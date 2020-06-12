@@ -1,0 +1,33 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    ["@babel/plugin-proposal-class-properties"],
+    [
+      "module-resolver",
+      {
+        "root": ["."],
+        "alias": {
+          "middlewares": "./src/middlewares",
+          "base": "./src/base",
+          "models": "./src/api/models",
+          "controllers": "./src/api/controllers",
+          "routes": "./src/api/routes",
+          "services": "./src/api/services",
+          "db": "./src/db",
+          "utils": "./src/utils",
+          "helpers": "./src/helpers",
+          "enums": "./src/enums"
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,33 @@
+const PORT = process.env.PORT || 4000;
+
+module.exports = {
+  app: {
+    name: 'phantompod-api',
+    port: PORT,
+    baseUrl: `http://localhost:${PORT}`,
+    webUrl: `http://localhost:3000`,
+  },
+  api: {
+    prefix: '/api',
+    versions: [1],
+  },
+  lang: 'en',
+  authToken: {
+    superSecret: 'ipa-odot',
+    expiresIn: 86400,
+    jwtSecret: 'pantompods',
+  },
+  db: {
+    url: 'mongodb://localhost:27017/phantompod',
+  },
+  ssl: {
+    key: 'key path goes here',
+    cert: 'cert path goes here',
+  },
+  google: {
+    OAuth: {
+      GOOGLE_CLIENT_ID: '642915743730-334e9pv6ugserg7v16k1q64tflugf6fq.apps.googleusercontent.com',
+      GOOGLE_CLIENT_SECRET: 'cbYGeefT1f2I01BlH1BUYLZQ',
+    },
+  },
+};
