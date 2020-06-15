@@ -10,8 +10,8 @@ const memberSchema = new Schema(
 		status: {
 			type: String,
 			enum: Object.values(podMemeberStatus),
-			required: podMemeberStatus.REQUESTED,
-			default: 2,
+			required: true,
+			default: podMemeberStatus.REQUESTED,
 		},
 	},
 	{ timestamps: true },

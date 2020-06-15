@@ -3,6 +3,7 @@ import mongoosePaginate from 'mongoose-paginate';
 mongoosePaginate.paginate.options = {
 	lean: true,
 	limit: 20,
+	sort: { createdAt: -1 },
 };
 
 export default mongoosePaginate;

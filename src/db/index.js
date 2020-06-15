@@ -25,3 +25,4 @@ export const connectDb = cb => {
 };
 
 export { default as paginatePlugin } from './paginatePlugin';
+export const toMongoObjectId = id => mongoose.Types.ObjectId(id);

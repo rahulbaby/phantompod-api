@@ -17,7 +17,7 @@ class AuthController extends BaseController {
 
       req.login(user, { session: false }, err => {
         if (err) {
-          res.status(401).json({ err, msg: 'Auth error' });
+          res.status(401).json({ err, message: 'Auth error' });
         }
 
         const token = jwt.sign(user.toJSON(), authToken.jwtSecret, {
@@ -39,7 +39,7 @@ class AuthController extends BaseController {
 
       req.login(user, { session: false }, err => {
         if (err) {
-          res.status(401).json({ err, msg: 'Auth error' });
+          res.status(401).json({ err, message: 'Auth error' });
         }
 
         return res.status(200).json({ user });

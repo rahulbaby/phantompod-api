@@ -8,8 +8,8 @@ class UserController {
       let ret = await record.save();
       return res.send(ret);
     } catch (error) {
-      let msg = error.message || `Something went wrong!`;
-      return res.status(400).send({ msg, error });
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
     }
   };
 }
