@@ -54,4 +54,9 @@ const podSchema = new Schema(
 podSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 podSchema.plugin(paginatePlugin);
 
+podSchema.statics.getPodRow = function (query) {
+	if (typeof query === 'string') query = { _id: query };
+	return this.findOne(query);
+};
+
 export default mongoose.model('Pod', podSchema);

@@ -18,6 +18,23 @@ class PodController {
     }
   };
 
+  marketplace = async (req, res, next) => {
+    try {
+      let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
+      let query = req.query.query ? JSON.parse(req.query.query) : {};
+      query.$and = [
+        { isPrivate: false },
+        { userId: { $ne: req.user._id } },
+        { 'members.userId': { $ne: req.user._id } },
+      ];
+      let ret = await Pod.paginate(query, paginateOptions);
+      return res.send(ret);
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
   create = async (req, res, next) => {
     let _id = req.body._id;
     let data = _.pick(
@@ -29,7 +46,7 @@ class PodController {
       'autoShare',
       'autoLike',
       'autoComment',
-      'autoVlidate',
+      'autoValidate',
     );
 
     try {
@@ -94,7 +111,7 @@ class PodController {
 
     try {
       let notificationLabel = `${userName} ${status} for your pod request <strong>${record.name}</strong>`;
-      await createNotification(memberId, record.userId, notificationLabel, { id: record._id });
+      await createNotification(record.userId, memberId, notificationLabel, { id: record._id });
       await record.save();
       return res.send({ record, message: 'Success' });
     } catch (error) {
@@ -109,7 +126,7 @@ class PodController {
 
     try {
       let ret = await Pod.findOneAndDelete({ _id: toMongoObjectId(_id), userId });
-      return res.send(ret);
+      return res.send({ message: 'deleted', ret });
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });

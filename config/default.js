@@ -30,4 +30,8 @@ module.exports = {
       GOOGLE_CLIENT_SECRET: 'cbYGeefT1f2I01BlH1BUYLZQ',
     },
   },
+  stripe: {
+    SECRET_KEY: 'sk_test_3hSrGVAUh0LB0zm1C4Yh5cE4',
+    PUBLIC_KEY: 'pk_test_F1U8ZiSPK9gAcjttJZTUiwrZ',
+  },
 };
