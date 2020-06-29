@@ -3,3 +3,10 @@ export const podMemeberStatus = {
 	ACCEPTED: 'accepted',
 	REJECTED: 'rejected',
 };
+
+export const userAccountStatus = {
+	TRIAL: 'trial',
+	ACTIVE: 'active',
+	EXPIRED: 'expired',
+	CANCELLED: 'cancelled',
+};

@@ -33,5 +33,7 @@ module.exports = {
   stripe: {
     SECRET_KEY: 'sk_test_3hSrGVAUh0LB0zm1C4Yh5cE4',
     PUBLIC_KEY: 'pk_test_F1U8ZiSPK9gAcjttJZTUiwrZ',
+    PRODUCT_PRICE_ID: 'price_1GyWkZBrW3Gw5uscVoPjmlXS', //current active price
+    apiVersion: '2020-03-02',
   },
 };

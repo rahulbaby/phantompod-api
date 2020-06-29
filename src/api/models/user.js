@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 import bcrypt from 'bcrypt';
+import { userAccountStatus } from 'base/constants';
 
 const SALT_WORK_FACTOR = 10;
 const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -27,6 +28,17 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Password cannot be left blank'],
       minlength: 5,
       maxlength: 1024,
+    },
+    status: {
+      type: String,
+      enum: Object.values(userAccountStatus),
+      required: true,
+      default: userAccountStatus.TRIAL,
+    },
+    payment: {
+      paymentDoneAt: Date,
+      expiresAt: Date,
+      amount: String,
     },
   },
   { timestamps: true },
