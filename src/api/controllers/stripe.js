@@ -1,4 +1,6 @@
 import config from 'config';
+import User from 'models/user';
+import { userAccountStatus } from 'base/constants';
 const STRIPE_SECRET_KEY = config.get('stripe.SECRET_KEY');
 const PRODUCT_PRICE_ID = config.get('stripe.PRODUCT_PRICE_ID');
 const apiVersion = config.get('stripe.apiVersion');
@@ -11,21 +13,23 @@ class StripeController {
     const customer = await stripe.customers.create({
       email: req.body.email,
     });
-
-    // Recommendation: save the customer.id in your database.
+    const stripeCustomerId = customer.id;
+    const userId = req.user._id;
+    await User.findByIdAndUpdate(userId, { stripeCustomerId });
     res.send({ customer });
   };
 
   createSubscription = async (req, res, next) => {
+    const stripeCustomerId = req.body.customerId; //req.user.stripeCustomerId;
     try {
       await stripe.paymentMethods.attach(req.body.paymentMethodId, {
-        customer: req.body.customerId,
+        customer: stripeCustomerId,
       });
     } catch (error) {
       return res.status('402').send({ error: { message: error.message } });
     }
 
-    let updateCustomerDefaultPaymentMethod = await stripe.customers.update(req.body.customerId, {
+    let updateCustomerDefaultPaymentMethod = await stripe.customers.update(stripeCustomerId, {
       invoice_settings: {
         default_payment_method: req.body.paymentMethodId,
       },
@@ -33,14 +37,14 @@ class StripeController {
 
     // Create the subscription
     const subscription = await stripe.subscriptions.create({
-      customer: req.body.customerId,
+      customer: stripeCustomerId,
       items: [{ price: PRODUCT_PRICE_ID }],
       expand: ['latest_invoice.payment_intent'],
     });
 
-    console.log(subscription);
+    //console.log(subscription);
 
-    res.send(subscription);
+    res.status(401).send(subscription);
   };
 
   subscriptionList = async (req, res, next) => {
@@ -56,12 +60,30 @@ class StripeController {
   };
 
   webhooks = async (req, res, next) => {
+    const { data, type } = req.body;
+
+    if (!type) return res.status('400').send({ message: 'Error in payment_intent' });
+    const eventsArr = type.split('.');
+    if (eventsArr[0] !== 'payment_intent') return res.status(200).send({ type, data });
+    console.log('/webhooks POST route hit! ::::::::: ', type);
+
     try {
-      console.log('/webhooks POST route hit! req.body: ', req.body);
-      res.send(200);
+      const customerId = data.customer;
+      if (!customerId) return res.status('400').send({ message: 'Stripe - customerId not found' });
+      const paymentSuccess = eventsArr[1] === 'succeeded';
+      const paymentCanceled = eventsArr[1] === 'canceled';
+      let userObj = {
+        status: paymentCanceled
+          ? userAccountStatus.CANCELLED
+          : paymentSuccess
+          ? userAccountStatus.ACTIVE
+          : userAccountStatus.ERROR,
+        paymentExpiresAt: paymentSuccess ? data.period_end : null,
+      };
+      await User.findOneAndUpdate({ stripeCustomerId }, userObj);
+      return res.status(200).send({ type, data });
     } catch (err) {
-      console.log('/webhooks route error: ', err);
-      res.send(200);
+      return res.status(400).send({ err });
     }
   };
 }

@@ -1,3 +1,5 @@
+import config from 'config';
+
 export const comments = [
 	'Great post {{firstName}}!',
 	'Thanks for sharing {{firstName}}!',
@@ -10,4 +12,15 @@ export const podMemeberStatus = {
 	REQUESTED: 'requested',
 	ACCEPTED: 'accepted',
 	REJECTED: 'rejected',
+};
+const PUBLIC_KEY = config.get('stripe.PUBLIC_KEY');
+const PRODUCT_PRICE_ID = config.get('stripe.PRODUCT_PRICE_ID');
+const apiVersion = config.get('stripe.apiVersion');
+const PRODUCT_NAME = config.get('stripe.PRODUCT_NAME');
+
+export const paymentCredentials = {
+	PUBLIC_KEY,
+	PRODUCT_PRICE_ID,
+	apiVersion,
+	PRODUCT_NAME,
 };

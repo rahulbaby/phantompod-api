@@ -1,10 +1,48 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 import bcrypt from 'bcrypt';
 import { userAccountStatus } from 'base/constants';
 
 const SALT_WORK_FACTOR = 10;
 const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+const billingDetailsSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    companyName: {
+      type: String,
+      required: true,
+    },
+    country: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    streetAddress: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    zip: {
+      type: String,
+      required: true,
+    },
+    vatNumber: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true },
+);
 
 const userSchema = new mongoose.Schema(
   {
@@ -35,11 +73,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: userAccountStatus.TRIAL,
     },
-    payment: {
-      paymentDoneAt: Date,
-      expiresAt: Date,
-      amount: String,
-    },
+    stripeCustomerId: { type: String, default: null },
+    paymentExpiresAt: { type: String, default: null },
+    stripeObj: Object,
+    billingDetails: billingDetailsSchema,
   },
   { timestamps: true },
 );
