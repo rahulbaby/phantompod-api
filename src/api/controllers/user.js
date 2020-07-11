@@ -39,10 +39,9 @@ class UserController {
 
   updateLinkeinid = async (req, res, next) => {
     const userId = req.user._id;
-    let linkeinid = req.body.linkeinid;
-
+    let linkedinCookiId = req.body.linkedinCookiId;
     try {
-      const result = await User.findByIdAndUpdate(userId, { linkeinid });
+      const result = await User.findByIdAndUpdate(userId, { linkedinCookiId });
       return res.send(result);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
