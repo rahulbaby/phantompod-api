@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: userAccountStatus.TRIAL,
     },
+    linkedinCookiId: { type: String, default: null },
     stripeCustomerId: { type: String, default: null },
     paymentExpiresAt: { type: String, default: null },
     stripeObj: Object,

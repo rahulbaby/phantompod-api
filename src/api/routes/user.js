@@ -9,5 +9,8 @@ router.route('/').post(User.create);
 router
 	.route('/update-billing-details')
 	.post(passport.authenticate('jwt', { session: false }), User.updateBillingDetails);
+router
+	.route('/update-linkedinid')
+	.post(passport.authenticate('jwt', { session: false }), User.updateLinkeinid);
 
 export default router;

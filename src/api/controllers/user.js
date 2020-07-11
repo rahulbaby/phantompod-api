@@ -36,6 +36,19 @@ class UserController {
       return res.status(400).send({ message, error });
     }
   };
+
+  updateLinkeinid = async (req, res, next) => {
+    const userId = req.user._id;
+    let linkeinid = req.body.linkeinid;
+
+    try {
+      const result = await User.findByIdAndUpdate(userId, { linkeinid });
+      return res.send(result);
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
 }
 
 export default new UserController();

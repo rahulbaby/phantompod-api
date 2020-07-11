@@ -11,7 +11,7 @@ class StripeController {
   createCustomer = async (req, res, next) => {
     // Create a new customer object
     const customer = await stripe.customers.create({
-      email: req.body.email,
+      email: req.user.email,
     });
     const stripeCustomerId = customer.id;
     const userId = req.user._id;
@@ -20,7 +20,7 @@ class StripeController {
   };
 
   createSubscription = async (req, res, next) => {
-    const stripeCustomerId = req.body.customerId; //req.user.stripeCustomerId;
+    const stripeCustomerId = req.user.stripeCustomerId;
     try {
       await stripe.paymentMethods.attach(req.body.paymentMethodId, {
         customer: stripeCustomerId,
@@ -60,18 +60,22 @@ class StripeController {
   };
 
   webhooks = async (req, res, next) => {
-    const { data, type } = req.body;
+    let { data, type } = req.body;
 
     if (!type) return res.status('400').send({ message: 'Error in payment_intent' });
     const eventsArr = type.split('.');
     if (eventsArr[0] !== 'payment_intent') return res.status(200).send({ type, data });
-    console.log('/webhooks POST route hit! ::::::::: ', type);
+    //console.log('/webhooks POST route hit! ::::::::: ', type, data);
 
     try {
-      const customerId = data.customer;
-      if (!customerId) return res.status('400').send({ message: 'Stripe - customerId not found' });
+      data = data.object;
+      const stripeCustomerId = data.customer;
+      console.log('stripeCustomerId', stripeCustomerId);
+      if (!stripeCustomerId)
+        return res.status('400').send({ message: 'Stripe - customerId not found' });
       const paymentSuccess = eventsArr[1] === 'succeeded';
       const paymentCanceled = eventsArr[1] === 'canceled';
+      console.log('eventsArr[1]', eventsArr[1]);
       let userObj = {
         status: paymentCanceled
           ? userAccountStatus.CANCELLED
@@ -80,9 +84,11 @@ class StripeController {
           : userAccountStatus.ERROR,
         paymentExpiresAt: paymentSuccess ? data.period_end : null,
       };
+      console.log('userObj', userObj, data);
       await User.findOneAndUpdate({ stripeCustomerId }, userObj);
       return res.status(200).send({ type, data });
     } catch (err) {
+      console.log('webhooks error ', err);
       return res.status(400).send({ err });
     }
   };
