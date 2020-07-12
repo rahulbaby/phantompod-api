@@ -19,6 +19,22 @@ class StripeController {
     res.send({ customer });
   };
 
+  cancelSubscription = async (req, res, next) => {
+    const userId = req.user._id;
+    const stripeSubscriptionId = req.user.stripeSubscriptionId;
+
+    try {
+      stripe.subscriptions.del(stripeSubscriptionId);
+      await User.findOneAndUpdate(
+        { _id: userId },
+        { status: userAccountStatus.CANCELLED, paymentExpiresAt: null, stripeSubscriptionId: null },
+      );
+      return res.status(200);
+    } catch (error) {
+      return res.status('402').send({ error: { message: error.message } });
+    }
+  };
+
   createSubscription = async (req, res, next) => {
     const stripeCustomerId = req.user.stripeCustomerId;
     try {
@@ -61,30 +77,42 @@ class StripeController {
 
   webhooks = async (req, res, next) => {
     let { data, type } = req.body;
-
     if (!type) return res.status('400').send({ message: 'Error in payment_intent' });
+    data = data.object;
+    //console.log('type', type);
+    if (type == 'invoice.paid') console.log('/webhooks POST route hit! ::::::::: ', type, data);
+    const stripeCustomerId = data.customer;
+    if (!stripeCustomerId)
+      return res.status('400').send({ message: 'Stripe - customerId not found' });
+
     const eventsArr = type.split('.');
+    if (eventsArr[0] === 'invoice' && eventsArr[1] === 'paid') {
+      await User.findOneAndUpdate(
+        { stripeCustomerId },
+        {
+          status: data.paid ? userAccountStatus.ACTIVE : userAccountStatus.ERROR,
+          paymentExpiresAt: data.period_end || null,
+          stripeSubscriptionId: data.subscription,
+        },
+      );
+      return res.status(200).send({ type, data });
+    }
+    return res.status(200);
+
     if (eventsArr[0] !== 'payment_intent') return res.status(200).send({ type, data });
-    //console.log('/webhooks POST route hit! ::::::::: ', type, data);
 
     try {
-      data = data.object;
       const stripeCustomerId = data.customer;
-      console.log('stripeCustomerId', stripeCustomerId);
-      if (!stripeCustomerId)
-        return res.status('400').send({ message: 'Stripe - customerId not found' });
+
       const paymentSuccess = eventsArr[1] === 'succeeded';
       const paymentCanceled = eventsArr[1] === 'canceled';
-      console.log('eventsArr[1]', eventsArr[1]);
       let userObj = {
         status: paymentCanceled
           ? userAccountStatus.CANCELLED
           : paymentSuccess
           ? userAccountStatus.ACTIVE
           : userAccountStatus.ERROR,
-        paymentExpiresAt: paymentSuccess ? data.period_end : null,
       };
-      console.log('userObj', userObj, data);
       await User.findOneAndUpdate({ stripeCustomerId }, userObj);
       return res.status(200).send({ type, data });
     } catch (err) {

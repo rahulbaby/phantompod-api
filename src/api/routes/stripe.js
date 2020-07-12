@@ -5,6 +5,9 @@ import Stripe from 'controllers/stripe';
 const router = Router();
 
 router
+	.route('/cancel-subscription')
+	.post(passport.authenticate('jwt', { session: false }), Stripe.cancelSubscription);
+router
 	.route('/create-customer')
 	.get(passport.authenticate('jwt', { session: false }), Stripe.createCustomer);
 router

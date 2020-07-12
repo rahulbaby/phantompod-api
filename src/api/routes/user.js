@@ -12,5 +12,12 @@ router
 router
 	.route('/update-linkedinid')
 	.post(passport.authenticate('jwt', { session: false }), User.updateLinkeinid);
+router
+	.route('/reset-user')
+	.get(passport.authenticate('jwt', { session: false }), User.resetPaymentDetails);
+
+router
+	.route('/create-trial-subscription')
+	.post(passport.authenticate('jwt', { session: false }), User.createTrialSubscription);
 
 export default router;

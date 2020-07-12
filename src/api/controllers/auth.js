@@ -1,7 +1,6 @@
 import BaseController from 'base/controller';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
-import User from 'models/user';
 import { authToken } from 'config';
 
 class AuthController extends BaseController {

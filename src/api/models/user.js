@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema(
       minlength: 5,
       maxlength: 255,
     },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: [true, 'Password cannot be left blank'],
@@ -69,18 +73,34 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: Object.values(userAccountStatus),
-      required: true,
-      default: userAccountStatus.TRIAL,
+      //enum: Object.values(userAccountStatus),
+      //required: true,
+      default: null,
     },
     linkedinCookiId: { type: String, default: null },
     stripeCustomerId: { type: String, default: null },
+    stripeProductId: { type: String, default: null },
+    stripeSubscriptionId: { type: String, default: null },
     paymentExpiresAt: { type: String, default: null },
     stripeObj: Object,
     billingDetails: billingDetailsSchema,
   },
   { timestamps: true },
 );
+
+userSchema.virtual('onTrial').get(function () {
+  return this.status === null || this.status === userAccountStatus.TRIAL;
+});
+userSchema.virtual('isActive').get(function () {
+  return this.status !== userAccountStatus.TRIAL && this.paymentExpiresAt !== null;
+});
+
+userSchema.virtual('isBillingAdded').get(function () {
+  return this.billingDetails && this.billingDetails.name && this.billingDetails.name !== '';
+});
+
+userSchema.set('toObject', { virtuals: true });
+userSchema.set('toJSON', { virtuals: true });
 
 userSchema.pre('save', function (next) {
   var user = this;

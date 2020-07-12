@@ -1,15 +1,22 @@
 import Pod from 'models/pod';
+import ShortUniqueId from 'short-unique-id';
+
 import { createNotification } from 'models/notification';
 import { _ } from 'underscore';
 import { podMemeberStatus } from 'base/constants';
 import { toMongoObjectId } from 'db';
+
+const uid = new ShortUniqueId({ length: 8 });
 
 class PodController {
   index = async (req, res, next) => {
     try {
       let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
       let query = req.query.query ? JSON.parse(req.query.query) : {};
-      query.$or = [{ 'members.userId': req.user._id }, { userId: req.user._id }];
+      query.$or = [
+        { 'members.userId': req.user._id, 'members.status': podMemeberStatus.ACCEPTED },
+        { userId: req.user._id },
+      ];
       let ret = await Pod.paginate(query, paginateOptions);
       return res.send(ret);
     } catch (error) {
@@ -52,7 +59,7 @@ class PodController {
     try {
       if (!_id) {
         data.userId = req.user._id;
-        data.podKey = _.random(111111, 999999);
+        data.podKey = uid();
         let record = new Pod(data);
         let ret = await record.save();
         _id = ret._id;
