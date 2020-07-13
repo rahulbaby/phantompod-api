@@ -1,7 +1,7 @@
 export const podMemeberStatus = {
 	REQUESTED: 'requested',
 	ACCEPTED: 'accepted',
-	REJECTED: 'rejected',
+	BANNED: 'banned',
 };
 
 export const userAccountStatus = {

@@ -1,6 +1,10 @@
+import moment from 'moment';
 import _ from 'underscore';
 import User from 'models/user';
 import { userAccountStatus } from 'base/constants';
+import config from 'config';
+
+const trialSubscriptionDetails = config.get('trialSubscription');
 
 class UserController {
   create = async (req, res, next) => {
@@ -74,6 +78,10 @@ class UserController {
     const userId = req.user._id;
     let userData = {
       status: userAccountStatus.TRIAL,
+      trialDetails: {
+        expiresAt: moment(new Date()).add('days', trialSubscriptionDetails.TRIAL_PERIOD).unix(),
+        podCount: trialSubscriptionDetails.TRIAL_PERIOD,
+      },
     };
 
     try {
@@ -83,6 +91,22 @@ class UserController {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
+  };
+
+  resetPassword = async (req, res, next) => {
+    const userId = req.user._id;
+    const { oldPassword, newPassword } = req.body;
+
+    req.user.comparePassword(oldPassword, async (err, isMatch) => {
+      if (!isMatch) return res.status(400).send({ message: 'Wrong password' });
+      try {
+        const result = await User.findByIdAndUpdate(userId, { password: newPassword });
+        return res.send(result);
+      } catch (error) {
+        let message = error.message || `Something went wrong!`;
+        return res.status(400).send({ message, error });
+      }
+    });
   };
 }
 

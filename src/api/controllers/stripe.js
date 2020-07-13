@@ -1,8 +1,11 @@
+import moment from 'moment';
 import config from 'config';
 import User from 'models/user';
 import { userAccountStatus } from 'base/constants';
 const STRIPE_SECRET_KEY = config.get('stripe.SECRET_KEY');
 const PRODUCT_PRICE_ID = config.get('stripe.PRODUCT_PRICE_ID');
+const PRODUCT_PERIOD = config.get('stripe.PRODUCT_PERIOD');
+
 const apiVersion = config.get('stripe.apiVersion');
 
 const stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion });
@@ -24,7 +27,7 @@ class StripeController {
     const stripeSubscriptionId = req.user.stripeSubscriptionId;
 
     try {
-      stripe.subscriptions.del(stripeSubscriptionId);
+      //stripe.subscriptions.del(stripeSubscriptionId);
       await User.findOneAndUpdate(
         { _id: userId },
         { status: userAccountStatus.CANCELLED, paymentExpiresAt: null, stripeSubscriptionId: null },
@@ -91,7 +94,9 @@ class StripeController {
         { stripeCustomerId },
         {
           status: data.paid ? userAccountStatus.ACTIVE : userAccountStatus.ERROR,
-          paymentExpiresAt: data.period_end || null,
+          paymentExpiresAt: data.paid
+            ? moment(new Date()).add('days', PRODUCT_PERIOD).unix()
+            : null,
           stripeSubscriptionId: data.subscription,
         },
       );

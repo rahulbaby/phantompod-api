@@ -20,4 +20,8 @@ router
 	.route('/create-trial-subscription')
 	.post(passport.authenticate('jwt', { session: false }), User.createTrialSubscription);
 
+router
+	.route('/reset-password')
+	.post(passport.authenticate('jwt', { session: false }), User.resetPassword);
+
 export default router;

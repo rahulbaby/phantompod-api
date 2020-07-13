@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 import bcrypt from 'bcrypt';
+import moment from 'moment';
 import { userAccountStatus } from 'base/constants';
 
 const SALT_WORK_FACTOR = 10;
@@ -84,15 +85,26 @@ const userSchema = new mongoose.Schema(
     paymentExpiresAt: { type: String, default: null },
     stripeObj: Object,
     billingDetails: billingDetailsSchema,
+    trialDetails: {
+      expiresAt: String,
+      podCount: Number,
+    },
   },
   { timestamps: true },
 );
 
 userSchema.virtual('onTrial').get(function () {
-  return this.status === null || this.status === userAccountStatus.TRIAL;
+  return (
+    (this.status === null || this.status === userAccountStatus.TRIAL) &&
+    moment.unix(this.trialDetails.expiresAt).isAfter(moment())
+  );
 });
 userSchema.virtual('isActive').get(function () {
-  return this.status !== userAccountStatus.TRIAL && this.paymentExpiresAt !== null;
+  return (
+    this.status !== userAccountStatus.TRIAL &&
+    this.paymentExpiresAt !== null &&
+    moment.unix(this.paymentExpiresAt).isAfter(moment())
+  );
 });
 
 userSchema.virtual('isBillingAdded').get(function () {

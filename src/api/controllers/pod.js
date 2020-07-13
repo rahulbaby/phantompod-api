@@ -44,6 +44,7 @@ class PodController {
 
   create = async (req, res, next) => {
     let _id = req.body._id;
+    const userId = req.user._id;
     let data = _.pick(
       req.body,
       'isPrivate',
@@ -57,15 +58,42 @@ class PodController {
     );
 
     try {
-      if (!_id) {
-        data.userId = req.user._id;
-        data.podKey = uid();
-        let record = new Pod(data);
-        let ret = await record.save();
-        _id = ret._id;
-      } else {
-        await Pod.findByIdAndUpdate(_id, data);
-      }
+      data.userId = userId;
+      data.podKey = uid();
+      data.members = [
+        {
+          userId,
+          name: req.user.name,
+          status: podMemeberStatus.ACCEPTED,
+        },
+      ];
+      let record = new Pod(data);
+      let ret = await record.save();
+      _id = ret._id;
+      return res.send({ _id });
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
+  update = async (req, res, next) => {
+    let _id = req.body._id;
+    const userId = req.user._id;
+    let data = _.pick(
+      req.body,
+      'isPrivate',
+      'name',
+      'description',
+      'comments',
+      'autoShare',
+      'autoLike',
+      'autoComment',
+      'autoValidate',
+    );
+
+    try {
+      await Pod.findByIdAndUpdate(_id, data);
       return res.send({ _id });
     } catch (error) {
       let message = error.message || `Something went wrong!`;
@@ -118,6 +146,31 @@ class PodController {
 
     try {
       let notificationLabel = `${userName} ${status} for your pod request <strong>${record.name}</strong>`;
+      await createNotification(record.userId, memberId, notificationLabel, { id: record._id });
+      await record.save();
+      return res.send({ record, message: 'Success' });
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
+  removeMemberAcccess = async (req, res, next) => {
+    const { _id, podId, memberId } = req.body;
+    const userId = req.user._id;
+    const userName = req.user.name;
+
+    let record = await Pod.findOne({ _id: podId });
+    if (!record) return res.status(500).send({ message: "Pod doesn't exists" });
+    if (record.userId.toString() !== userId.toString())
+      return res.status(500).send({ message: "You don' have permission" });
+
+    let existing = record.members.findIndex(x => x.userId.toString() == memberId.toString());
+    if (existing < 0) return res.status(500).send({ message: "Member doesn't exists" });
+    record.members = record.members.filter(x => x.userId.toString() != memberId.toString());
+
+    try {
+      let notificationLabel = `${userName} removed from pod - <strong>${record.name}</strong>`;
       await createNotification(record.userId, memberId, notificationLabel, { id: record._id });
       await record.save();
       return res.send({ record, message: 'Success' });

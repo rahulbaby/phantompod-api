@@ -11,7 +11,7 @@ export const comments = [
 export const podMemeberStatus = {
 	REQUESTED: 'requested',
 	ACCEPTED: 'accepted',
-	REJECTED: 'rejected',
+	BANNED: 'banned',
 };
 const PUBLIC_KEY = config.get('stripe.PUBLIC_KEY');
 const PRODUCT_PRICE_ID = config.get('stripe.PRODUCT_PRICE_ID');
