@@ -17,7 +17,7 @@ passport.use(
     async (email, password, cb) => {
       try {
         const user = await UserModel.findOne({ email });
-        if (!user) return cb(null, false, { message: 'Incorrect Email.' });
+        if (!user) return cb(null, false, { message: 'Invalid email address.' });
         user.comparePassword(password, (err, isMatch) => {
           if (!isMatch) return cb(null, false, { message: 'Wrong Password' });
           return cb(null, user, { message: 'Logged in Successfully' });
