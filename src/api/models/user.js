@@ -72,6 +72,9 @@ const userSchema = new mongoose.Schema(
       minlength: 5,
       maxlength: 1024,
     },
+    encryptedString: {
+      type: String,
+    },
     status: {
       type: String,
       //enum: Object.values(userAccountStatus),

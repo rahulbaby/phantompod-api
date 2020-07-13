@@ -6,6 +6,8 @@ const router = Router();
 
 router.route('/').post(User.create);
 
+router.route('/verifyUser').post(User.verifyHash);
+
 router
 	.route('/update-billing-details')
 	.post(passport.authenticate('jwt', { session: false }), User.updateBillingDetails);
