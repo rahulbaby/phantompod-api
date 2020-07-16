@@ -3,16 +3,44 @@ import _ from 'underscore';
 import User from 'models/user';
 import { userAccountStatus } from 'base/constants';
 import config from 'config';
+import sesTransport from 'nodemailer-ses-transport';
+import nodemailer from 'nodemailer';
+import Cryptr from 'cryptr';
+const cryptr = new Cryptr('pass123');
 
 const trialSubscriptionDetails = config.get('trialSubscription');
 
 class UserController {
   create = async (req, res, next) => {
     let { name, email, password } = req.body;
-    let record = new User({ name, email, password });
+    const encryptedString = cryptr.encrypt(email);
+    let record = new User({ name, email, password ,encryptedString });
     try {
       let ret = await record.save();
-      return res.send(ret);
+      var newRes = res;
+      var sesTransporter = nodemailer.createTransport(sesTransport({
+        accessKeyId: 'AKIA2XCCQ6NIKLEFZTHJ',
+        secretAccessKey: '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',
+        region:'us-east-2'
+      }));
+        const mailOptions = {
+          from: `hello@phantompod.co`,
+          to: 'developer@phantompod.co',
+          subject: `${name}`,
+          text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
+          replyTo: `hello@phantompod.co`
+        }
+        
+        sesTransporter.sendMail(mailOptions, function(err, resp) {
+          if (err) {
+            console.error('there was an error: ', err);
+          } else {
+            console.log('here is the res: ', resp);
+            
+            return newRes.send('Saved');
+          }
+        })
+      //return res.send(ret);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
@@ -52,6 +80,17 @@ class UserController {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
+  };
+
+  verifyHash = async (req, res, next) => {
+    try {
+    const decryptedString = cryptr.decrypt(req.body.hash);
+    let record = await User.findOneAndUpdate({ email:decryptedString },{emailVerified:true});
+    return res.send({verified:record.emailVerified});
+  } catch (error) {
+    let message = error.message || `Something went wrong!`;
+    return res.status(400).send({ message, error });
+  }
   };
 
   resetPaymentDetails = async (req, res, next) => {
