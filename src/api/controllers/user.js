@@ -177,8 +177,10 @@ class UserController {
     req.user.comparePassword(oldPassword, async (err, isMatch) => {
       if (!isMatch) return res.status(400).send({ message: 'Wrong password' });
       try {
-        const result = await User.findOneAndUpdate({ _id: userId }, { password: newPassword });
-        return res.send(result);
+        const user = await User.findOne({ _id: userId });
+        user.password = newPassword;
+        let ret = await user.save();
+        return res.send(ret);
       } catch (error) {
         let message = error.message || `Something went wrong!`;
         return res.status(400).send({ message, error });

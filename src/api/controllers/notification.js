@@ -4,12 +4,13 @@ import { toMongoObjectId } from 'db';
 class NotificationController {
   index = async (req, res, next) => {
     try {
+      const userId = req.user.id;
       let paginateOptions = req.query.options
         ? JSON.parse(req.query.options)
         : { sort: { seen: 1, createdAt: -1 } };
       let query = { receiver: req.user._id };
       let ret = await Notification.paginate(query, paginateOptions);
-      const unreadTotal = await Notification.count({ seen: false });
+      const unreadTotal = await Notification.count({ seen: false, receiver: userId });
       return res.send({ ...ret, unreadTotal });
     } catch (error) {
       let message = error.message || `Something went wrong!`;

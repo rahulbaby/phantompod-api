@@ -138,11 +138,10 @@ userSchema.pre('save', function (next) {
     });
   });
 });
-
 /*
-userSchema.pre('findOneAndUpdate', async function () {
+userSchema.pre('findOneAndUpdate', async function (next) {
   const user = this;
-  if (user.password && user.isModified('password'))
+  if (user.isModified('password'))
     bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
       if (err) return next(err);
       bcrypt.hash(user.password, salt, function (err, hash) {
@@ -151,7 +150,7 @@ userSchema.pre('findOneAndUpdate', async function () {
         return next();
       });
     });
-  if (user.isModified('image')) deleteFile(`${UPLOAD_PATH}/${user.image}`);
+  //if (user.isModified('image')) deleteFile(`${UPLOAD_PATH}/${user.image}`);
   return next();
 });
 */
