@@ -34,27 +34,38 @@ class UserController {
     let record = new User({ name, email, password, encryptedString });
     try {
       let ret = await record.save();
-      var newRes = res;
       const APIEMAIL = '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';
       sgMail.setApiKey(APIEMAIL);
       const msg = {
-        to: 'tdanoop19@gmail.com',
+        to: `${email}`,
         from: 'developer@phantompod.co', // Use the email address or domain you verified above
-        subject: 'Sending with Twilio SendGrid is Fun',
-        text: 'and easy to do anywhere, even with Node.js',
-        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        subject: 'Activate your Phantompod account!',
+        text: `Hello ${name}`,
+        html: `<strong>Hello ${name},</strong><br/><br/>
+        You are one step away from activating your Phantompod account.<br/><br/>
+        Follow this link to verify your account.<br/><br/>
+        http://localhost:3000/verify-email?hash=${encryptedString}<br/><br/>
+        If you didn’t create an account on Phantompod, you can ignore this email.<br/><br/>
+        Thanks,<br/><br/>
+        Team Phantompod!`,
       };
+
+      console.log('msg : ',msg);
 
       sgMail.send(msg).then(
         () => {},
         error => {
           console.error(error);
 
-          return res.send(ret);
+          console.log('error : ',error);
 
           if (error.response) {
             console.error('check error response : ', error.response.body);
           }
+
+          return res.send(ret);
+
+          
         },
       );
 

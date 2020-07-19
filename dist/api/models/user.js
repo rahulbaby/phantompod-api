@@ -15,6 +15,10 @@ var _moment = _interopRequireDefault(require("moment"));
 
 var _constants = require("../../base/constants");
 
+var _utils = require("../../utils");
+
+var _user = require("../controllers/user");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -65,6 +69,11 @@ const userSchema = new _mongoose.default.Schema({
     required: true,
     minlength: 5,
     maxlength: 50
+  },
+  image: {
+    type: String,
+    required: false,
+    default: null
   },
   email: {
     type: String,
@@ -152,6 +161,22 @@ userSchema.pre('save', function (next) {
     });
   });
 });
+/*
+userSchema.pre('findOneAndUpdate', async function (next) {
+  const user = this;
+  if (user.isModified('password'))
+    bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+      if (err) return next(err);
+      bcrypt.hash(user.password, salt, function (err, hash) {
+        if (err) return next(err);
+        user.password = hash;
+        return next();
+      });
+    });
+  //if (user.isModified('image')) deleteFile(`${UPLOAD_PATH}/${user.image}`);
+  return next();
+});
+*/
 
 userSchema.methods.comparePassword = function (candidatePassword, cb) {
   _bcrypt.default.compare(candidatePassword, this.password, function (err, isMatch) {
