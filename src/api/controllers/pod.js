@@ -13,10 +13,7 @@ class PodController {
     try {
       let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
       let query = req.query.query ? JSON.parse(req.query.query) : {};
-      query.$or = [
-        { 'members.userId': req.user._id, 'members.status': podMemeberStatus.ACCEPTED },
-        { userId: req.user._id },
-      ];
+      query.$or = [{userId: req.user._id },{members:{$elemMatch:{userId:req.user._id,status:podMemeberStatus.ACCEPTED}}}]
       let ret = await Pod.paginate(query, paginateOptions);
       return res.send(ret);
     } catch (error) {
@@ -36,7 +33,7 @@ class PodController {
       ];
       let ret = await Pod.paginate(query, paginateOptions);
       return res.send(ret);
-    } catch (error) {
+    } catch (error) {x
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }

@@ -7,6 +7,7 @@ import sesTransport from 'nodemailer-ses-transport';
 import nodemailer from 'nodemailer';
 import Cryptr from 'cryptr';
 const cryptr = new Cryptr('pass123');
+const sgMail = require('@sendgrid/mail')
 
 const trialSubscriptionDetails = config.get('trialSubscription');
 
@@ -18,29 +19,50 @@ class UserController {
     try {
       let ret = await record.save();
       var newRes = res;
-      var sesTransporter = nodemailer.createTransport(sesTransport({
-        accessKeyId: 'AKIA2XCCQ6NIKLEFZTHJ',
-        secretAccessKey: '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',
-        region:'us-east-2'
-      }));
-        const mailOptions = {
-          from: `hello@phantompod.co`,
-          to: 'developer@phantompod.co',
-          subject: `${name}`,
-          text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
-          replyTo: `hello@phantompod.co`
-        }
+      const APIEMAIL = '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';
+      sgMail.setApiKey(APIEMAIL);
+      const msg = {
+        to: 'tdanoop19@gmail.com',
+        from: 'developer@phantompod.co', // Use the email address or domain you verified above
+        subject: 'Sending with Twilio SendGrid is Fun',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      };
+
+
+      sgMail
+      .send(msg)
+      .then(() => {}, error => {
+       console.error(error);
+
+       return res.send(ret);
+ 
+       if (error.response) {
+        console.error('check error response : ',error.response.body)
+       }
+     });
+      
+      //sgMail.send(msg)
+
+      // var client = nodemailer.createTransport(sgTransport(options));
+      //   const mailOptions = {
+      //     from: `hello@phantompod.co`,
+      //     to: 'developer@phantompod.co',
+      //     subject: `${name}`,
+      //     text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
+      //     replyTo: `hello@phantompod.co`
+      //   }
         
-        sesTransporter.sendMail(mailOptions, function(err, resp) {
-          if (err) {
-            console.error('there was an error: ', err);
-          } else {
-            console.log('here is the res: ', resp);
+      //   sesTransporter.sendMail(mailOptions, function(err, resp) {
+      //     if (err) {
+      //       console.error('there was an error: ', err);
+      //     } else {
+      //       console.log('here is the res: ', resp);
             
-            return newRes.send('Saved');
-          }
-        })
-      //return res.send(ret);
+      //       return newRes.send('Saved');
+      //     }
+      //   })
+      return res.send(ret);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
