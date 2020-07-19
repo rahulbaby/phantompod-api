@@ -26,4 +26,8 @@ router
 	.route('/reset-password')
 	.post(passport.authenticate('jwt', { session: false }), User.resetPassword);
 
+router
+	.route('/update-profile-image')
+	.post(passport.authenticate('jwt', { session: false }), User.updateProfileImage);
+
 export default router;

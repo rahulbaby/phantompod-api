@@ -3,6 +3,8 @@ import uniqueValidator from 'mongoose-unique-validator';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 import { userAccountStatus } from 'base/constants';
+import { deleteFile } from 'utils';
+import { UPLOAD_PATH } from 'controllers/user';
 
 const SALT_WORK_FACTOR = 10;
 const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -52,6 +54,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 5,
       maxlength: 50,
+    },
+    image: {
+      type: String,
+      required: false,
+      default: null,
     },
     email: {
       type: String,
@@ -131,6 +138,23 @@ userSchema.pre('save', function (next) {
     });
   });
 });
+
+/*
+userSchema.pre('findOneAndUpdate', async function () {
+  const user = this;
+  if (user.password && user.isModified('password'))
+    bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+      if (err) return next(err);
+      bcrypt.hash(user.password, salt, function (err, hash) {
+        if (err) return next(err);
+        user.password = hash;
+        return next();
+      });
+    });
+  if (user.isModified('image')) deleteFile(`${UPLOAD_PATH}/${user.image}`);
+  return next();
+});
+*/
 
 userSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {

@@ -36,7 +36,7 @@ let corsConfig = {};
 if (onProduction) {
   corsConfig = {
     origin: function (origin, callback) {
-      const allowedOrigins = ['https://www.phantompods.com', 'https://www.admin.phantompods.com'];
+      const allowedOrigins = ['https://www.phantompods.co', 'https://www.admin.phantompods.co'];
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         let msg =

@@ -1,13 +1,29 @@
 import moment from 'moment';
 import _ from 'underscore';
+
 import User from 'models/user';
 import { userAccountStatus } from 'base/constants';
 import config from 'config';
 import sesTransport from 'nodemailer-ses-transport';
 import nodemailer from 'nodemailer';
 import Cryptr from 'cryptr';
+import multer from 'multer';
+import { deleteFile } from 'utils';
+
+export const UPLOAD_PATH = './uploads/user';
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, UPLOAD_PATH);
+  },
+  filename: (req, file, callback) => {
+    callback(null, Date.now() + '.png');
+  },
+});
+
+const upload = multer({ storage }).single('image');
+
 const cryptr = new Cryptr('pass123');
-const sgMail = require('@sendgrid/mail')
+const sgMail = require('@sendgrid/mail');
 
 const trialSubscriptionDetails = config.get('trialSubscription');
 
@@ -15,7 +31,7 @@ class UserController {
   create = async (req, res, next) => {
     let { name, email, password } = req.body;
     const encryptedString = cryptr.encrypt(email);
-    let record = new User({ name, email, password ,encryptedString });
+    let record = new User({ name, email, password, encryptedString });
     try {
       let ret = await record.save();
       var newRes = res;
@@ -29,19 +45,19 @@ class UserController {
         html: '<strong>and easy to do anywhere, even with Node.js</strong>',
       };
 
+      sgMail.send(msg).then(
+        () => {},
+        error => {
+          console.error(error);
 
-      sgMail
-      .send(msg)
-      .then(() => {}, error => {
-       console.error(error);
+          return res.send(ret);
 
-       return res.send(ret);
- 
-       if (error.response) {
-        console.error('check error response : ',error.response.body)
-       }
-     });
-      
+          if (error.response) {
+            console.error('check error response : ', error.response.body);
+          }
+        },
+      );
+
       //sgMail.send(msg)
 
       // var client = nodemailer.createTransport(sgTransport(options));
@@ -52,13 +68,13 @@ class UserController {
       //     text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
       //     replyTo: `hello@phantompod.co`
       //   }
-        
+
       //   sesTransporter.sendMail(mailOptions, function(err, resp) {
       //     if (err) {
       //       console.error('there was an error: ', err);
       //     } else {
       //       console.log('here is the res: ', resp);
-            
+
       //       return newRes.send('Saved');
       //     }
       //   })
@@ -106,13 +122,13 @@ class UserController {
 
   verifyHash = async (req, res, next) => {
     try {
-    const decryptedString = cryptr.decrypt(req.body.hash);
-    let record = await User.findOneAndUpdate({ email:decryptedString },{emailVerified:true});
-    return res.send({verified:record.emailVerified});
-  } catch (error) {
-    let message = error.message || `Something went wrong!`;
-    return res.status(400).send({ message, error });
-  }
+      const decryptedString = cryptr.decrypt(req.body.hash);
+      let record = await User.findOneAndUpdate({ email: decryptedString }, { emailVerified: true });
+      return res.send({ verified: record.emailVerified });
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
   };
 
   resetPaymentDetails = async (req, res, next) => {
@@ -161,10 +177,35 @@ class UserController {
     req.user.comparePassword(oldPassword, async (err, isMatch) => {
       if (!isMatch) return res.status(400).send({ message: 'Wrong password' });
       try {
-        const result = await User.findByIdAndUpdate(userId, { password: newPassword });
+        const result = await User.findOneAndUpdate({ _id: userId }, { password: newPassword });
         return res.send(result);
       } catch (error) {
         let message = error.message || `Something went wrong!`;
+        return res.status(400).send({ message, error });
+      }
+    });
+  };
+
+  updateProfileImage = async (req, res, next) => {
+    const userId = req.user._id;
+
+    upload(req, res, async err => {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).send({ msg: 'File upload error', err });
+      } else if (err) {
+        return res.status(400).send({ msg: 'UNKNOWN File upload error', err });
+      }
+      let record = await User.findOne({ _id: userId });
+      const imagePre = record.image;
+      if (req.file) record.image = req.file.filename;
+
+      try {
+        let ret = await User.findOneAndUpdate({ _id: userId }, record);
+        if (imagePre && req.file.filename) deleteFile(`${UPLOAD_PATH}/${imagePre}`);
+        return res.send({ message: 'Profile image updated' });
+      } catch (error) {
+        if (req.file) deleteFile(`${UPLOAD_PATH}/${req.file.filename}`);
+        let message = `Something went wrong!`;
         return res.status(400).send({ message, error });
       }
     });

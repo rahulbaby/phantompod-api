@@ -6,8 +6,8 @@ const cryptr = new Cryptr('pass123');
 const mailOptions = {
 	from: `hello@phantompod.co`,
 	to: 'developer@phantompod.co',
-	subject: `${name}`,
-	text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
+	subject: ``,
+	text: `http://localhost:3000/verify-email?hash=`,
 	replyTo: `hello@phantompod.co`,
 };
 const sendEmail = () => {

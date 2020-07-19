@@ -59,4 +59,14 @@ podSchema.statics.getPodRow = function (query) {
 	return this.findOne(query);
 };
 
+podSchema.statics.getActivePods = async userId => {
+	let query = {};
+	query.$or = [
+		{ userId },
+		{ members: { $elemMatch: { userId, status: podMemeberStatus.ACCEPTED } } },
+	];
+	let ret = await this.paginate(query);
+	return ret;
+};
+
 export default mongoose.model('Pod', podSchema);

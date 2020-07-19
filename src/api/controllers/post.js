@@ -8,10 +8,14 @@ import { podMemeberStatus } from 'base/constants';
 class PostController {
   index = async (req, res, next) => {
     try {
+      const userId = req.user._id;
       let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
       paginateOptions.populate = { path: 'userId', select: ['_id', 'name'] };
       let query = req.query.query ? JSON.parse(req.query.query) : {};
-      query.$or = [{ 'members.userId': req.user._id }, { userId: req.user._id }];
+      /*query.$or = [
+        { userId: req.user._id },
+        { members: { $elemMatch: { userId: req.user._id, status: podMemeberStatus.ACCEPTED } } },
+      ];*/
       let ret = await Post.paginate(query, paginateOptions);
       return res.send(ret);
     } catch (error) {
@@ -36,12 +40,23 @@ class PostController {
     );
 
     try {
+      if (!req.user.isActive && !req.user.onTrial)
+        return res.status(400).send({ message: `You don't have any active plans!` });
       const pod = await Pod.getPodRow(podId);
       if (!pod) return res.status(500).send({ message: "Pod doesn't exists!" });
-      data.approved = pod.autoValidate;
+      const ownPod = req.user._id.toString() == pod.userId.toString();
+      data.approved = ownPod ? true : pod.autoValidate;
       data.userId = req.user._id;
       let record = new Post(data);
       let ret = await record.save();
+      if (!pod.autoValidate && !ownPod) {
+        let notificationLabel = `${req.user.name} added new post in your pod <strong>${pod.name}</strong>`;
+        console.log('notificationLabel', notificationLabel);
+        await createNotification(req.user._id, pod.userId, notificationLabel, {
+          id: pod._id,
+          url: `pod/details/${pod._id}`,
+        });
+      }
 
       return res.send({ ret });
     } catch (error) {
@@ -55,8 +70,20 @@ class PostController {
     const userId = req.user._id;
 
     try {
-      let ret = await Post.findOneAndDelete({ _id: toMongoObjectId(_id), userId });
+      let ret = await Post.findOneAndDelete({ _id: toMongoObjectId(_id) });
       return res.send({ message: 'Deleted', ret });
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
+  approve = async (req, res, next) => {
+    const id = req.body.id;
+    const userId = req.user._id;
+    try {
+      let ret = await Post.findOneAndUpdate({ _id: toMongoObjectId(id) }, { approved: true });
+      return res.send({ message: 'Approved', ret });
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });

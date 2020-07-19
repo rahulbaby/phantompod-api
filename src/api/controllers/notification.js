@@ -6,10 +6,11 @@ class NotificationController {
     try {
       let paginateOptions = req.query.options
         ? JSON.parse(req.query.options)
-        : { sort: { seen: 1 } };
+        : { sort: { seen: 1, createdAt: -1 } };
       let query = { receiver: req.user._id };
       let ret = await Notification.paginate(query, paginateOptions);
-      return res.send(ret);
+      const unreadTotal = await Notification.count({ seen: false });
+      return res.send({ ...ret, unreadTotal });
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });

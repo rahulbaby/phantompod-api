@@ -40,6 +40,6 @@ module.exports = {
   },
   trialSubscription: {
     TRIAL_PERIOD: 2, //days
-    POD_COUNT: 5, //maximum pods user can attend while he is in trial
+    POD_COUNT: 2, //maximum pods user can attend while he is in trial
   },
 };
