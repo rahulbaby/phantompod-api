@@ -17,16 +17,24 @@ class NotificationController {
   constructor() {
     _defineProperty(this, "index", async (req, res, next) => {
       try {
+        const userId = req.user.id;
         let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {
           sort: {
-            seen: 1
+            seen: 1,
+            createdAt: -1
           }
         };
         let query = {
           receiver: req.user._id
         };
         let ret = await _notification.default.paginate(query, paginateOptions);
-        return res.send(ret);
+        const unreadTotal = await _notification.default.count({
+          seen: false,
+          receiver: userId
+        });
+        return res.send({ ...ret,
+          unreadTotal
+        });
       } catch (error) {
         let message = error.message || `Something went wrong!`;
         return res.status(400).send({

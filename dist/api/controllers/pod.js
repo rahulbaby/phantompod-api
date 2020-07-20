@@ -7,7 +7,11 @@ exports.default = void 0;
 
 var _pod = _interopRequireDefault(require("../models/pod"));
 
+var _user = _interopRequireDefault(require("../models/user"));
+
 var _shortUniqueId = _interopRequireDefault(require("short-unique-id"));
+
+var _config = _interopRequireDefault(require("config"));
 
 var _notification = require("../models/notification");
 
@@ -21,6 +25,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+const POD_COUNT = _config.default.get('trialSubscription.POD_COUNT');
+
 const uid = new _shortUniqueId.default({
   length: 8
 });
@@ -32,10 +38,14 @@ class PodController {
         let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
         let query = req.query.query ? JSON.parse(req.query.query) : {};
         query.$or = [{
-          'members.userId': req.user._id,
-          'members.status': _constants.podMemeberStatus.ACCEPTED
-        }, {
           userId: req.user._id
+        }, {
+          members: {
+            $elemMatch: {
+              userId: req.user._id,
+              status: _constants.podMemeberStatus.ACCEPTED
+            }
+          }
         }];
         let ret = await _pod.default.paginate(query, paginateOptions);
         return res.send(ret);
@@ -66,6 +76,7 @@ class PodController {
         let ret = await _pod.default.paginate(query, paginateOptions);
         return res.send(ret);
       } catch (error) {
+        x;
         let message = error.message || `Something went wrong!`;
         return res.status(400).send({
           message,
@@ -81,6 +92,24 @@ class PodController {
       let data = _underscore._.pick(req.body, 'isPrivate', 'name', 'description', 'comments', 'autoShare', 'autoLike', 'autoComment', 'autoValidate');
 
       try {
+        const activePods = await _pod.default.paginate({
+          $or: [{
+            userId
+          }, {
+            members: {
+              $elemMatch: {
+                userId,
+                status: _constants.podMemeberStatus.ACCEPTED
+              }
+            }
+          }]
+        });
+        if (activePods.total >= POD_COUNT && req.user.onTrial) return res.status(400).send({
+          message: `No more than ${POD_COUNT} pods allowded for trial account`
+        });
+        if (!req.user.isActive && !req.user.onTrial) return res.status(400).send({
+          message: `You don't have any active plans!`
+        });
         data.userId = userId;
         data.podKey = uid();
         data.members = [{
@@ -197,6 +226,30 @@ class PodController {
       record.members[existing].status = status;
 
       try {
+        if (status === _constants.podMemeberStatus.ACCEPTED) {
+          const member = await _user.default.findOne({
+            _id: memberId
+          });
+          const activePods = await _pod.default.paginate({
+            $or: [{
+              userId: memberId
+            }, {
+              members: {
+                $elemMatch: {
+                  userId: memberId,
+                  status: _constants.podMemeberStatus.ACCEPTED
+                }
+              }
+            }]
+          });
+          if (activePods.total >= POD_COUNT && member.onTrial) return res.status(400).send({
+            message: `No more than ${POD_COUNT} pods allowded for trial account`
+          });
+          if (!member.isActive && !member.onTrial) return res.status(400).send({
+            message: `User doesn't have any active plans!`
+          });
+        }
+
         let notificationLabel = `${userName} ${status} for your pod request <strong>${record.name}</strong>`;
         await (0, _notification.createNotification)(record.userId, memberId, notificationLabel, {
           id: record._id

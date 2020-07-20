@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = exports.UPLOAD_PATH = void 0;
 
 var _moment = _interopRequireDefault(require("moment"));
 
@@ -21,10 +21,29 @@ var _nodemailer = _interopRequireDefault(require("nodemailer"));
 
 var _cryptr = _interopRequireDefault(require("cryptr"));
 
+var _multer = _interopRequireDefault(require("multer"));
+
+var _utils = require("../../utils");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+const UPLOAD_PATH = './uploads/user';
+exports.UPLOAD_PATH = UPLOAD_PATH;
+
+const storage = _multer.default.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, UPLOAD_PATH);
+  },
+  filename: (req, file, callback) => {
+    callback(null, Date.now() + '.png');
+  }
+});
+
+const upload = (0, _multer.default)({
+  storage
+}).single('image');
 const cryptr = new _cryptr.default('pass123');
 
 const sgMail = require('@sendgrid/mail');
@@ -49,16 +68,15 @@ class UserController {
 
       try {
         let ret = await record.save();
-        var newRes = res;
         const APIEMAIL = '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';
         sgMail.setApiKey(APIEMAIL);
         const msg = {
-          to: 'tdanoop19@gmail.com',
+          to: `${email}`,
           from: 'developer@phantompod.co',
           // Use the email address or domain you verified above
-          subject: 'Sending with Twilio SendGrid is Fun',
-          text: 'and easy to do anywhere, even with Node.js',
-          html: '<strong>and easy to do anywhere, even with Node.js</strong>'
+          subject: 'Activate your Phantompod account!',
+          text: `Hello ${name}`,
+          html: `<strong>Hello ${name} yoo</strong>`
         };
         sgMail.send(msg).then(() => {}, error => {
           console.error(error);
@@ -209,12 +227,54 @@ class UserController {
         });
 
         try {
-          const result = await _user.default.findByIdAndUpdate(userId, {
-            password: newPassword
+          const user = await _user.default.findOne({
+            _id: userId
           });
-          return res.send(result);
+          user.password = newPassword;
+          let ret = await user.save();
+          return res.send(ret);
         } catch (error) {
           let message = error.message || `Something went wrong!`;
+          return res.status(400).send({
+            message,
+            error
+          });
+        }
+      });
+    });
+
+    _defineProperty(this, "updateProfileImage", async (req, res, next) => {
+      const userId = req.user._id;
+      upload(req, res, async err => {
+        if (err instanceof _multer.default.MulterError) {
+          return res.status(400).send({
+            msg: 'File upload error',
+            err
+          });
+        } else if (err) {
+          return res.status(400).send({
+            msg: 'UNKNOWN File upload error',
+            err
+          });
+        }
+
+        let record = await _user.default.findOne({
+          _id: userId
+        });
+        const imagePre = record.image;
+        if (req.file) record.image = req.file.filename;
+
+        try {
+          let ret = await _user.default.findOneAndUpdate({
+            _id: userId
+          }, record);
+          if (imagePre && req.file.filename) (0, _utils.deleteFile)(`${UPLOAD_PATH}/${imagePre}`);
+          return res.send({
+            message: 'Profile image updated'
+          });
+        } catch (error) {
+          if (req.file) (0, _utils.deleteFile)(`${UPLOAD_PATH}/${req.file.filename}`);
+          let message = `Something went wrong!`;
           return res.status(400).send({
             message,
             error

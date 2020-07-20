@@ -31,5 +31,8 @@ router.route('/create-trial-subscription').post(_passport.default.authenticate('
 router.route('/reset-password').post(_passport.default.authenticate('jwt', {
   session: false
 }), _user.default.resetPassword);
+router.route('/update-profile-image').post(_passport.default.authenticate('jwt', {
+  session: false
+}), _user.default.updateProfileImage);
 var _default = router;
 exports.default = _default;
