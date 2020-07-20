@@ -75,7 +75,7 @@ app.use((err, req, res, next) => {
 });
 
 const createServer = () => {
-  return process.env.NODE_ENV === 'production'
+  return process.env.NODE_ENV === 'production' && false
     ? https.createServer(
         {
           key: config.get('ssl.key'),
