@@ -23,5 +23,6 @@ router.route('/alter-members').put(_pod.default.allterMembers);
 router.route('/request-member-access').put(_pod.default.allterMembers);
 router.route('/alter-member-access').put(_pod.default.allterMemberAcccess);
 router.route('/remove-member').put(_pod.default.removeMemberAcccess);
+router.route('/active-members').get(_pod.default.getActiveMembers);
 var _default = router;
 exports.default = _default;

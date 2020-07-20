@@ -50,6 +50,8 @@ const sgMail = require('@sendgrid/mail');
 
 const trialSubscriptionDetails = _config.default.get('trialSubscription');
 
+const webUrl = _config.default.get('app.webUrl');
+
 class UserController {
   constructor() {
     _defineProperty(this, "create", async (req, res, next) => {
@@ -76,22 +78,31 @@ class UserController {
           // Use the email address or domain you verified above
           subject: 'Activate your Phantompod account!',
           text: `Hello ${name}`,
-          html: `<strong>Hello ${name} yoo</strong>`
+          html: `<strong>Hello ${name},</strong><br/><br/>
+        You are one step away from activating your Phantompod account.<br/><br/>
+        Follow this link to verify your account.<br/><br/>
+        ${webUrl}/verify-email?hash=${encryptedString}<br/><br/>
+        If you didn’t create an account on Phantompod, you can ignore this email.<br/><br/>
+        Thanks,<br/><br/>
+        Team Phantompod!`
         };
+        console.log('msg : ', msg);
         sgMail.send(msg).then(() => {}, error => {
           console.error(error);
-          return res.send(ret);
+          console.log('error : ', error);
 
           if (error.response) {
             console.error('check error response : ', error.response.body);
           }
+
+          return res.send(ret);
         }); //sgMail.send(msg)
         // var client = nodemailer.createTransport(sgTransport(options));
         //   const mailOptions = {
         //     from: `hello@phantompod.co`,
         //     to: 'developer@phantompod.co',
         //     subject: `${name}`,
-        //     text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
+        //     text: `${webUrl}/verify-email?hash=${encryptedString}`,
         //     replyTo: `hello@phantompod.co`
         //   }
         //   sesTransporter.sendMail(mailOptions, function(err, resp) {
@@ -134,12 +145,19 @@ class UserController {
 
     _defineProperty(this, "updateLinkeinid", async (req, res, next) => {
       const userId = req.user._id;
-      let linkedinCookiId = req.body.linkedinCookiId;
+      let ok = JSON.stringify(req.body);
+      let a = ok.replace(/['"]+/g, '');
+      let b = a.replace(':', '');
+      let c = b.replace('{', '');
+      const linkedinCookiId = c.replace('}', '');
+      console.log('req.body - rxd', req.body);
+      console.log('linkedinCookiId - rxd', linkedinCookiId);
 
       try {
         const result = await _user.default.findByIdAndUpdate(userId, {
           linkedinCookiId
         });
+        console.log('result', result);
         return res.send(result);
       } catch (error) {
         let message = error.message || `Something went wrong!`;
