@@ -26,7 +26,7 @@ const cryptr = new Cryptr('pass123');
 const sgMail = require('@sendgrid/mail');
 
 const trialSubscriptionDetails = config.get('trialSubscription');
-const webUrl = config.get('webUrl');
+const webUrl = config.get('app.webUrl');
 
 class UserController {
   create = async (req, res, next) => {
@@ -45,28 +45,26 @@ class UserController {
         html: `<strong>Hello ${name},</strong><br/><br/>
         You are one step away from activating your Phantompod account.<br/><br/>
         Follow this link to verify your account.<br/><br/>
-        http://app.phantompod.co:3000/verify-email?hash=${encryptedString}<br/><br/>
+        ${webUrl}/verify-email?hash=${encryptedString}<br/><br/>
         If you didn’t create an account on Phantompod, you can ignore this email.<br/><br/>
         Thanks,<br/><br/>
         Team Phantompod!`,
       };
 
-      console.log('msg : ',msg);
+      console.log('msg : ', msg);
 
       sgMail.send(msg).then(
         () => {},
         error => {
           console.error(error);
 
-          console.log('error : ',error);
+          console.log('error : ', error);
 
           if (error.response) {
             console.error('check error response : ', error.response.body);
           }
 
           return res.send(ret);
-
-          
         },
       );
 
