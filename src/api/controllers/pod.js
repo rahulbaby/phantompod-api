@@ -224,6 +224,20 @@ class PodController {
       return res.status(400).send({ message, error });
     }
   };
+
+  getActiveMembers = async (req, res, next) => {
+    const id = req.query.id;
+    try {
+      let record = await Pod.findOne({ _id: id }).populate('members.userId');
+      record.members.map(({ userId: user }) => {
+        console.log(`USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} `);
+      });
+      return res.send(record);
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
 }
 
 export default new PodController();

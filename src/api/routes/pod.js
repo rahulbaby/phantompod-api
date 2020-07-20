@@ -12,5 +12,6 @@ router.route('/alter-members').put(Pod.allterMembers);
 router.route('/request-member-access').put(Pod.allterMembers);
 router.route('/alter-member-access').put(Pod.allterMemberAcccess);
 router.route('/remove-member').put(Pod.removeMemberAcccess);
+router.route('/active-members').get(Pod.getActiveMembers);
 
 export default router;
