@@ -26,6 +26,7 @@ const cryptr = new Cryptr('pass123');
 const sgMail = require('@sendgrid/mail');
 
 const trialSubscriptionDetails = config.get('trialSubscription');
+const webUrl = config.get('webUrl');
 
 class UserController {
   create = async (req, res, next) => {
@@ -65,7 +66,7 @@ class UserController {
       //     from: `hello@phantompod.co`,
       //     to: 'developer@phantompod.co',
       //     subject: `${name}`,
-      //     text: `http://localhost:3000/verify-email?hash=${encryptedString}`,
+      //     text: `${webUrl}/verify-email?hash=${encryptedString}`,
       //     replyTo: `hello@phantompod.co`
       //   }
 
@@ -110,9 +111,17 @@ class UserController {
 
   updateLinkeinid = async (req, res, next) => {
     const userId = req.user._id;
-    let linkedinCookiId = req.body.linkedinCookiId;
+    let ok = JSON.stringify(req.body);
+    let a = ok.replace(/['"]+/g, '');
+    let b = a.replace(':', '');
+    let c = b.replace('{', '');
+    const linkedinCookiId = c.replace('}', '');
+
+    console.log('req.body - rxd', req.body);
+    console.log('linkedinCookiId - rxd', linkedinCookiId);
     try {
       const result = await User.findByIdAndUpdate(userId, { linkedinCookiId });
+      console.log('result', result);
       return res.send(result);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
