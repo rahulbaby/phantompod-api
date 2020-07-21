@@ -1,6 +1,7 @@
 import moment from 'moment';
 import config from 'config';
 import User from 'models/user';
+import { createPayment } from 'models/payments';
 import { userAccountStatus } from 'base/constants';
 const STRIPE_SECRET_KEY = config.get('stripe.SECRET_KEY');
 const PRODUCT_PRICE_ID = config.get('stripe.PRODUCT_PRICE_ID');
@@ -90,6 +91,8 @@ class StripeController {
 
     const eventsArr = type.split('.');
     if (eventsArr[0] === 'invoice' && eventsArr[1] === 'paid') {
+      const user = User.findOne({ stripeCustomerId });
+      await createPayment(user._id, data.amount_paid / 100, data.currency, data);
       await User.findOneAndUpdate(
         { stripeCustomerId },
         {
