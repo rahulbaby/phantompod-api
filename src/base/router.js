@@ -31,7 +31,8 @@ router.route('/items').get((req, res, next) => {
 router.route('/verify-email').post(async (req, res, next) => {
 	try {
 		const decryptedString = cryptr.decrypt(req.body.hash);
-		let record = await User.findOneAndUpdate({ email: decryptedString }, { emailVerified: true });
+		await User.findOneAndUpdate({ email: decryptedString }, { emailVerified: true });
+		let record = await User.findOne({ email: decryptedString });
 		return res.send({ verified: record.emailVerified });
 	} catch (error) {
 		let message = error.message || `Something went wrong!`;
