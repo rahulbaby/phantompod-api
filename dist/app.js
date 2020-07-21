@@ -55,7 +55,7 @@ if (onProduction) {
       const allowedOrigins = ['https://www.phantompods.co', 'https://www.admin.phantompods.co'];
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.indexOf(origin) === -1) {
+      if (allowedOrigins.indexOf(origin) === -1 && false) {
         let msg = 'The CORS policy for this site does not ' + 'allow access from the specified Origin.';
         return callback(new Error(msg), false);
       }
@@ -88,7 +88,7 @@ app.use((err, req, res, next) => {
 });
 
 const createServer = () => {
-  return process.env.NODE_ENV === 'production' ? _https.default.createServer({
+  return process.env.NODE_ENV === 'production' && false ? _https.default.createServer({
     key: _config.default.get('ssl.key'),
     cert: _config.default.get('ssl.cert')
   }, app) : _http.default.createServer(app);
