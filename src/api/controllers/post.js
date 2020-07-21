@@ -58,7 +58,7 @@ class PostController {
         });
       }
 
-      return res.send({ ret });
+      return res.send(ret);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
@@ -84,6 +84,21 @@ class PostController {
     try {
       let ret = await Post.findOneAndUpdate({ _id: toMongoObjectId(id) }, { approved: true });
       return res.send({ message: 'Approved', ret });
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
+  triggerBot = async (req, res, next) => {
+    const id = req.query.id;
+    try {
+      let post = await Post.findOne({ _id: id });
+      let record = await Pod.findOne({ _id: post.podId }).populate('members.userId');
+      record.members.map(({ userId: user }) => {
+        console.log(`USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} `);
+      });
+      return res.send(record);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
