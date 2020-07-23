@@ -4,6 +4,7 @@ import { createNotification } from 'models/notification';
 import { _ } from 'underscore';
 import { toMongoObjectId } from 'db';
 import { podMemeberStatus } from 'base/constants';
+import puppeteer from 'puppeteer';
 
 class PostController {
   index = async (req, res, next) => {
@@ -92,6 +93,19 @@ class PostController {
 
   triggerBot = async (req, res, next) => {
     const id = req.query.id;
+    let obj = {
+      domain: '.www.linkedin.com',
+      expirationDate: 1619110812.023159,
+      hostOnly: false,
+      httpOnly: true,
+      name: 'li_at',
+      path: '/',
+      sameSite: 'no_restriction',
+      secure: true,
+      session: false,
+      storeId: '1',
+      id: 16,
+    };
     try {
       let post = await Post.findOne({ _id: id });
       let record = await Pod.findOne({ _id: post.podId }).populate('members.userId');
@@ -100,6 +114,66 @@ class PostController {
       let commentRef = 0;
       record.members.map(({ userId: user }) => {
         commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
+
+        (async () => {
+          const browser = await puppeteer.launch({ headless: true });
+          const page = await browser.newPage();
+          function delay(time) {
+            return new Promise(function (resolve) {
+              setTimeout(resolve, time);
+            });
+          }
+          obj['value'] = user.linkedinCookiId;
+          await page.setCookie(obj);
+
+          try {
+            await page.goto(post.url, { waitUntil: 'load', timeout: 0 });
+          } catch (e) {
+            if (e instanceof puppeteer.errors.TimeoutError) {
+              await page.setDefaultNavigationTimeout(0);
+            }
+          }
+          //COMMENT
+          if (post.autoComment === true) {
+            try {
+              await page.type("[class='ql-editor ql-blank']", comments[commentRef]);
+            } catch (e) {
+              if (e instanceof puppeteer.errors.TimeoutError) {
+                await page.setDefaultNavigationTimeout(0);
+              }
+            }
+            await delay(4000);
+            await page.evaluate(() => {
+              let elements = document.getElementsByClassName(
+                'comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3',
+              );
+              for (let element of elements) element.click();
+            });
+          }
+          //LIKE
+          if (post.autoLike === true) {
+            await page.evaluate(() => {
+              let elements = document.getElementsByClassName(
+                'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
+              );
+              for (let element of elements) element.click();
+            });
+          }
+          //SHARE
+          if (post.autoShare === true) {
+            await delay(2000);
+            await page.evaluate(() => {
+              let elements = document.getElementsByClassName(
+                'share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view',
+              );
+              for (let element of elements) element.click();
+            });
+          }
+
+          await delay(4000);
+          await browser.close();
+        })();
+
         console.log(
           `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `,
         );
