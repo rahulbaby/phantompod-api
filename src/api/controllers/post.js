@@ -95,8 +95,14 @@ class PostController {
     try {
       let post = await Post.findOne({ _id: id });
       let record = await Pod.findOne({ _id: post.podId }).populate('members.userId');
+      let comments = post.comments;
+      let commentsLength = comments.length;
+      let commentRef = 0;
       record.members.map(({ userId: user }) => {
-        console.log(`USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} `);
+        commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
+        console.log(
+          `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `,
+        );
       });
       return res.send(record);
     } catch (error) {

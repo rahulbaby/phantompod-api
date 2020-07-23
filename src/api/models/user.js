@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
-import { userAccountStatus } from 'base/constants';
+import { userAccountStatus, userRoles } from 'base/constants';
 import { deleteFile } from 'utils';
 import { UPLOAD_PATH } from 'controllers/user';
 
@@ -42,6 +42,12 @@ const billingDetailsSchema = new Schema(
     vatNumber: {
       type: String,
       required: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(userRoles),
+      required: true,
+      default: userRoles.USER,
     },
   },
   { timestamps: true },

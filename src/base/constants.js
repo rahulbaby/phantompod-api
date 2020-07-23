@@ -11,3 +11,8 @@ export const userAccountStatus = {
 	EXPIRED: 'expired',
 	CANCELLED: 'cancelled',
 };
+
+export const userRoles = {
+	ADMIN: 'admin',
+	USER: 'user',
+};
