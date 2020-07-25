@@ -59,6 +59,12 @@ const billingDetailsSchema = new _mongoose.Schema({
   vatNumber: {
     type: String,
     required: true
+  },
+  role: {
+    type: String,
+    enum: Object.values(_constants.userRoles),
+    required: true,
+    default: _constants.userRoles.USER
   }
 }, {
   timestamps: true

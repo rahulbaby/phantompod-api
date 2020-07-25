@@ -81,7 +81,7 @@ class UserController {
           html: `<strong>Hello ${name},</strong><br/><br/>
         You are one step away from activating your Phantompod account.<br/><br/>
         Follow this link to verify your account.<br/><br/>
-        ${webUrl}/verify-email?hash=${encryptedString}<br/><br/>
+        http://app.phantompod.co/verify-email?hash=${encryptedString}<br/><br/>
         If you didn’t create an account on Phantompod, you can ignore this email.<br/><br/>
         Thanks,<br/><br/>
         Team Phantompod!`

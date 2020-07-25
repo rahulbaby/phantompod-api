@@ -4,8 +4,8 @@ module.exports = {
   app: {
     name: 'phantompod-api',
     port: PORT,
-    baseUrl: `http://3.17.254.107:${PORT}`,
-    webUrl: `http://3.17.254.107:3000`,
+    baseUrl: `http://3.15.135.37:${PORT}`,
+    webUrl: `http://3.15.135.37:3000`,
   },
   api: {
     prefix: '/api',

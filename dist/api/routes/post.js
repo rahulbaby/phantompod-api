@@ -16,5 +16,6 @@ router.route('/').get(_post.default.index);
 router.route('/').post(_post.default.create);
 router.route('/approve').put(_post.default.approve);
 router.route('/').delete(_post.default.destroy);
+router.route('/trigger-bot').get(_post.default.triggerBot);
 var _default = router;
 exports.default = _default;

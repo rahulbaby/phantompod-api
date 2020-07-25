@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.userAccountStatus = exports.podMemeberStatus = void 0;
+exports.userRoles = exports.userAccountStatus = exports.podMemeberStatus = void 0;
 const podMemeberStatus = {
   REQUESTED: 'requested',
   ACCEPTED: 'accepted',
@@ -18,3 +18,8 @@ const userAccountStatus = {
   CANCELLED: 'cancelled'
 };
 exports.userAccountStatus = userAccountStatus;
+const userRoles = {
+  ADMIN: 'admin',
+  USER: 'user'
+};
+exports.userRoles = userRoles;

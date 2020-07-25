@@ -17,6 +17,8 @@ var _db = require("../../db");
 
 var _constants = require("../../base/constants");
 
+var _puppeteer = _interopRequireDefault(require("puppeteer"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -77,9 +79,7 @@ class PostController {
           });
         }
 
-        return res.send({
-          ret
-        });
+        return res.send(ret);
       } catch (error) {
         let message = error.message || `Something went wrong!`;
         return res.status(400).send({
@@ -124,6 +124,116 @@ class PostController {
           message: 'Approved',
           ret
         });
+      } catch (error) {
+        let message = error.message || `Something went wrong!`;
+        return res.status(400).send({
+          message,
+          error
+        });
+      }
+    });
+
+    _defineProperty(this, "triggerBot", async (req, res, next) => {
+      const id = req.query.id;
+      let obj = {
+        domain: '.www.linkedin.com',
+        expirationDate: 1619110812.023159,
+        hostOnly: false,
+        httpOnly: true,
+        name: 'li_at',
+        path: '/',
+        sameSite: 'no_restriction',
+        secure: true,
+        session: false,
+        storeId: '1',
+        id: 16
+      };
+
+      try {
+        let post = await _post.default.findOne({
+          _id: id
+        });
+        let record = await _pod.default.findOne({
+          _id: post.podId
+        }).populate('members.userId');
+        let comments = post.comments;
+        let commentsLength = comments.length;
+        let commentRef = 0;
+        record.members.map(({
+          userId: user
+        }) => {
+          commentRef = commentRef > comments.length ? commentRef = 0 : commentRef + 1;
+
+          (async () => {
+            const browser = await _puppeteer.default.launch({
+              headless: true
+            });
+            const page = await browser.newPage();
+
+            function delay(time) {
+              return new Promise(function (resolve) {
+                setTimeout(resolve, time);
+              });
+            }
+
+            obj['value'] = user.linkedinCookiId;
+            await page.setCookie(obj);
+
+            try {
+              await page.goto(post.url, {
+                waitUntil: 'load',
+                timeout: 0
+              });
+            } catch (e) {
+              if (e instanceof _puppeteer.default.errors.TimeoutError) {
+                await page.setDefaultNavigationTimeout(0);
+              }
+            } //COMMENT
+
+
+            if (post.autoComment === true) {
+              try {
+                await page.type("[class='ql-editor ql-blank']", comments[commentRef]);
+              } catch (e) {
+                if (e instanceof _puppeteer.default.errors.TimeoutError) {
+                  await page.setDefaultNavigationTimeout(0);
+                }
+              }
+
+              await delay(4000);
+              await page.evaluate(() => {
+                let elements = document.getElementsByClassName('comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3');
+
+                for (let element of elements) element.click();
+              });
+            } //LIKE
+
+
+            if (post.autoLike === true) {
+              await page.evaluate(() => {
+                let elements = document.getElementsByClassName('artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view');
+
+                for (let element of elements) element.click();
+              });
+            } //SHARE
+
+
+            if (post.autoShare === true) {
+              await delay(2000);
+              await page.evaluate(() => {
+                let elements = document.getElementsByClassName('share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view');
+
+                for (let element of elements) element.click();
+              });
+            }
+
+            await delay(4000);
+            await browser.close();
+          })();
+
+          console.log(`USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `);
+        });
+        return res.send(record);
       } catch (error) {
         let message = error.message || `Something went wrong!`;
         return res.status(400).send({

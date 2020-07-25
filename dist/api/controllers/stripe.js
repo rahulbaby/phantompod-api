@@ -11,6 +11,8 @@ var _config = _interopRequireDefault(require("config"));
 
 var _user = _interopRequireDefault(require("../models/user"));
 
+var _payments = require("../models/payments");
+
 var _constants = require("../../base/constants");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -137,6 +139,11 @@ class StripeController {
       const eventsArr = type.split('.');
 
       if (eventsArr[0] === 'invoice' && eventsArr[1] === 'paid') {
+        const user = _user.default.findOne({
+          stripeCustomerId
+        });
+
+        await (0, _payments.createPayment)(user._id, data.amount_paid / 100, data.currency, data);
         await _user.default.findOneAndUpdate({
           stripeCustomerId
         }, {
