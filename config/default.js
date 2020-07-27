@@ -4,8 +4,8 @@ module.exports = {
   app: {
     name: 'phantompod-api',
     port: PORT,
-    baseUrl: `http://localhost:${PORT}`,
-    webUrl: `http://localhost:3000`,
+    baseUrl: `https://app.phantompod.co/api`,
+    webUrl: `http://3.17.254.107:3000`,
   },
   api: {
     prefix: '/api',
@@ -34,9 +34,9 @@ module.exports = {
     apiVersion: '2020-03-02',
     SECRET_KEY: 'sk_test_3hSrGVAUh0LB0zm1C4Yh5cE4',
     PUBLIC_KEY: 'pk_test_F1U8ZiSPK9gAcjttJZTUiwrZ',
-    PRODUCT_PRICE_ID: 'price_1GwA8xBrW3Gw5uscGm2NEJlE', //current active price
-    PRODUCT_NAME: 'MONTHLY PLAN',
-    PRODUCT_PERIOD: 2, //days
+    PRODUCT_PRICE_ID: 'price_1H9X8qDZgeAkgxKXDgYl2xgQ', //current active price
+    PRODUCT_NAME: 'TEST PLAN',
+    PRODUCT_PERIOD: 30, //days
   },
   trialSubscription: {
     TRIAL_PERIOD: 2, //days
