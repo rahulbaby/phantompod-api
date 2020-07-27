@@ -53,10 +53,13 @@ router.route('/items').get((req, res, next) => {
 router.route('/verify-email').post(async (req, res, next) => {
   try {
     const decryptedString = cryptr.decrypt(req.body.hash);
-    let record = await _user.default.findOneAndUpdate({
+    await _user.default.findOneAndUpdate({
       email: decryptedString
     }, {
       emailVerified: true
+    });
+    let record = await _user.default.findOne({
+      email: decryptedString
     });
     return res.send({
       verified: record.emailVerified
