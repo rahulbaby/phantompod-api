@@ -32,8 +32,10 @@ module.exports = {
   },
   stripe: {
     apiVersion: '2020-03-02',
-    SECRET_KEY: 'sk_test_3hSrGVAUh0LB0zm1C4Yh5cE4',
-    PUBLIC_KEY: 'pk_test_F1U8ZiSPK9gAcjttJZTUiwrZ',
+    SECRET_KEY:
+      'pk_live_51GvxMtDZgeAkgxKXMx1RDDnnchtaxGX0ErwjatFqxa4N2hiBZQuHrAvcsSTOqaWfeCIq7dcKpbnbZCuXeOpAscHr00ppexAkmY',
+    PUBLIC_KEY:
+      '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',
     PRODUCT_PRICE_ID: 'price_1H9X8qDZgeAkgxKXDgYl2xgQ', //current active price
     PRODUCT_NAME: 'TEST PLAN',
     PRODUCT_PERIOD: 30, //days
