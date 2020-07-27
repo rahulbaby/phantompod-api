@@ -1,6 +1,7 @@
 import Payments from 'models/payments';
 import { toMongoObjectId } from 'db';
 
+//dummy coment
 class PaymentsController {
   index = async (req, res, next) => {
     try {
