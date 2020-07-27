@@ -5,6 +5,7 @@ import moment from 'moment';
 import { userAccountStatus, userRoles } from 'base/constants';
 import { deleteFile } from 'utils';
 import { UPLOAD_PATH } from 'controllers/user';
+import { paginatePlugin } from 'db';
 
 const SALT_WORK_FACTOR = 10;
 const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -42,12 +43,6 @@ const billingDetailsSchema = new Schema(
     vatNumber: {
       type: String,
       required: true,
-    },
-    role: {
-      type: String,
-      enum: Object.values(userRoles),
-      required: true,
-      default: userRoles.USER,
     },
   },
   { timestamps: true },
@@ -93,6 +88,12 @@ const userSchema = new mongoose.Schema(
       //enum: Object.values(userAccountStatus),
       //required: true,
       default: null,
+    },
+    role: {
+      type: String,
+      //enum: Object.values(userRoles),
+      required: true,
+      default: userRoles.USER,
     },
     linkedinCookiId: { type: String, default: null },
     stripeCustomerId: { type: String, default: null },
@@ -168,6 +169,7 @@ userSchema.methods.comparePassword = function (candidatePassword, cb) {
   });
 };
 
+userSchema.plugin(paginatePlugin);
 userSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
 export default mongoose.model('User', userSchema);

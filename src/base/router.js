@@ -11,6 +11,7 @@ import stripe from 'routes/stripe';
 import user from 'routes/user';
 import pod from 'routes/pod';
 import post from 'routes/post';
+import admin from 'routes/admin';
 
 const cryptr = new Cryptr('pass123');
 
@@ -22,6 +23,7 @@ router.use('/stripe', stripe);
 router.use('/pod', passport.authenticate('jwt', { session: false }), pod);
 router.use('/post', passport.authenticate('jwt', { session: false }), post);
 router.use('/notification', passport.authenticate('jwt', { session: false }), notification);
+router.use('/admin', passport.authenticate('jwt', { session: false }), admin);
 
 router.route('/items').get((req, res, next) => {
 	const items = require('../enums/items');
@@ -38,6 +40,13 @@ router.route('/verify-email').post(async (req, res, next) => {
 		let message = error.message || `Something went wrong!`;
 		return res.status(400).send({ message, error });
 	}
+});
+
+router.route('/create-admin').get(async (req, res, next) => {
+	let admin = { name: 'Admin', email: 'admin@admin.com', password: 'admin', role: 'admin' };
+	let record = new User(admin);
+	let ret = await record.save();
+	res.send(ret);
 });
 
 export default router;

@@ -2,7 +2,7 @@ import moment from 'moment';
 import _ from 'underscore';
 
 import User from 'models/user';
-import { userAccountStatus } from 'base/constants';
+import { userAccountStatus, userRoles } from 'base/constants';
 import config from 'config';
 import sesTransport from 'nodemailer-ses-transport';
 import nodemailer from 'nodemailer';
@@ -29,6 +29,23 @@ const trialSubscriptionDetails = config.get('trialSubscription');
 const webUrl = config.get('app.webUrl');
 
 class UserController {
+  index = async (req, res, next) => {
+    try {
+      let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
+      let query = req.query.query ? JSON.parse(req.query.query) : {};
+      query.role = { $ne: userRoles.ADMIN };
+      /* query.$and = [
+        { userId: req.user._id },
+        { members: { $elemMatch: { userId: req.user._id, status: podMemeberStatus.ACCEPTED } } },
+      ];*/
+      let ret = await User.paginate(query, paginateOptions);
+      return res.send(ret);
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
   create = async (req, res, next) => {
     let { name, email, password } = req.body;
     const encryptedString = cryptr.encrypt(email);

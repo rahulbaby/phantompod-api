@@ -1,5 +1,7 @@
 import config from 'config';
+import { userAccountStatus } from 'base/constants';
 
+export { userAccountStatus };
 export const comments = [
 	'Great post {{firstName}}!',
 	'Thanks for sharing {{firstName}}!',
