@@ -106,6 +106,7 @@ const userSchema = new mongoose.Schema(
       expiresAt: String,
       podCount: Number,
     },
+    profileViews: Number,
   },
   { timestamps: true },
 );

@@ -30,6 +30,7 @@ const postSchema = new Schema(
 		autoLike: Boolean,
 		autoComment: Boolean,
 		approved: Boolean,
+		postLikes: Number,
 	},
 	{ timestamps: true },
 );
