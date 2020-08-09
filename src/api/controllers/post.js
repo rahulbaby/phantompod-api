@@ -41,8 +41,8 @@ class PostController {
     );
 
     try {
-      //if (!req.user.isActive && !req.user.onTrial)
-      //return res.status(400).send({ message: `You don't have any active plans!` });
+      if (!req.user.isActive && !req.user.onTrial)
+        return res.status(400).send({ message: `You don't have any active plans!` });
       const pod = await Pod.getPodRow(podId);
       if (!pod) return res.status(500).send({ message: "Pod doesn't exists!" });
       const ownPod = req.user._id.toString() == pod.userId.toString();
@@ -112,92 +112,80 @@ class PostController {
       let comments = post.comments;
       let commentsLength = comments.length;
       let commentRef = 0;
-      let botArr = [];
-      record.members.map(async ({ userId: user }) => {
-        let botSingleObj = {};
+      let members = record.members.filter(x => x.linkedinCookiId && x.userId !== req.user.id);
+      record.members.map(({ userId: user }) => {
         commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
-        botSingleObj.linkedinCookiId = user.linkedinCookiId;
-        botSingleObj.autoComment = post.autoComment;
-        botSingleObj.autoLike = post.autoLike;
-        botSingleObj.autoShare = post.autoShare;
-        botSingleObj.comment = comments[commentRef];
-        botSingleObj.url = post.url;
-        botArr.push(botSingleObj);
+
+        if (user.linkedinCookiId !== null) {
+          (async () => {
+            const browser = await puppeteer.launch({ headless: true });
+            const page = await browser.newPage();
+            function delay(time) {
+              return new Promise(function (resolve) {
+                setTimeout(resolve, time);
+              });
+            }
+            obj['value'] = user.linkedinCookiId;
+            await page.setCookie(obj);
+
+            try {
+              await page.goto(post.url, { waitUntil: 'load', timeout: 0 });
+            } catch (e) {
+              if (e instanceof puppeteer.errors.TimeoutError) {
+                await page.setDefaultNavigationTimeout(0);
+              }
+            }
+            //COMMENT
+            if (post.autoComment === true) {
+              try {
+                await page.type("[class='ql-editor ql-blank']", comments[commentRef]);
+              } catch (e) {
+                if (e instanceof puppeteer.errors.TimeoutError) {
+                  await page.setDefaultNavigationTimeout(0);
+                }
+              }
+              await delay(4000);
+              await page.evaluate(() => {
+                let elements = document.getElementsByClassName(
+                  'comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3',
+                );
+                for (let element of elements) element.click();
+              });
+            }
+            //LIKE
+            if (post.autoLike === true) {
+              await page.evaluate(() => {
+                let elements = document.getElementsByClassName(
+                  'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
+                );
+                for (let element of elements) element.click();
+              });
+            }
+            //SHARE
+            if (post.autoShare === true) {
+              await delay(2000);
+              await page.evaluate(() => {
+                let elements = document.getElementsByClassName(
+                  'share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view',
+                );
+                for (let element of elements) element.click();
+              });
+            }
+
+            await delay(4000);
+            await browser.close();
+          })();
+        }
+        console.log(
+          `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `,
+        );
       });
-      triggerBotPromise(botArr);
       return res.send(record);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
   };
-}
-
-function delay(time) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, time);
-  });
-}
-
-async function triggerBotPromise(botArr) {
-  console.log('triggerBotPromise called');
-  for (let i = 0; i < botArr.length; i++) {
-    let botObj = botArr[i];
-    if (!botObj.linkedinCookiId || botObj.linkedinCookiId === '' || botObj.linkedinCookiId === null)
-      continue;
-
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.setCookie({ value: botObj.linkedinCookiId });
-
-    try {
-      await page.goto(botObj.url, { waitUntil: 'load', timeout: 0 });
-    } catch (e) {
-      if (e instanceof puppeteer.errors.TimeoutError) {
-        await page.setDefaultNavigationTimeout(0);
-      }
-    }
-    //COMMENT
-    if (botObj.autoComment === true) {
-      try {
-        await page.type("[class='ql-editor ql-blank']", botObj.comment);
-      } catch (e) {
-        if (e instanceof puppeteer.errors.TimeoutError) {
-          await page.setDefaultNavigationTimeout(0);
-        }
-      }
-      await delay(4000);
-      await page.evaluate(() => {
-        let elements = document.getElementsByClassName(
-          'comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3',
-        );
-        for (let element of elements) element.click();
-      });
-    }
-    //LIKE
-    if (botObj.autoLike === true) {
-      await page.evaluate(() => {
-        let elements = document.getElementsByClassName(
-          'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
-        );
-        for (let element of elements) element.click();
-      });
-    }
-    //SHARE
-    if (botObj.autoShare === true) {
-      await delay(2000);
-      await page.evaluate(() => {
-        let elements = document.getElementsByClassName(
-          'share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view',
-        );
-        for (let element of elements) element.click();
-      });
-    }
-
-    await delay(4000);
-    await browser.close();
-  }
-  console.log('triggerBotPromise end');
 }
 
 export default new PostController();
