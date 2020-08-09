@@ -28,7 +28,7 @@ class StripeController {
     const stripeSubscriptionId = req.user.stripeSubscriptionId;
 
     try {
-      //stripe.subscriptions.del(stripeSubscriptionId);
+      await stripe.subscriptions.del(stripeSubscriptionId);
       await User.findOneAndUpdate(
         { _id: userId },
         { status: userAccountStatus.CANCELLED, paymentExpiresAt: null, stripeSubscriptionId: null },
@@ -83,7 +83,7 @@ class StripeController {
     let { data, type } = req.body;
     if (!type) return res.status('400').send({ message: 'Error in payment_intent' });
     data = data.object;
-    //console.log('type', type);
+    console.log('type', type);
     if (type == 'invoice.paid') console.log('/webhooks POST route hit! ::::::::: ', type, data);
     const stripeCustomerId = data.customer;
     if (!stripeCustomerId)
@@ -91,8 +91,9 @@ class StripeController {
 
     const eventsArr = type.split('.');
     if (eventsArr[0] === 'invoice' && eventsArr[1] === 'paid') {
-      const user = User.findOne({ stripeCustomerId });
-      await createPayment(user._id, data.amount_paid / 100, data.currency, data);
+      const user = await User.findOne({ stripeCustomerId });
+      console.log({ user });
+      await createPayment(user.id, data.amount_paid / 100, data.currency, data);
       await User.findOneAndUpdate(
         { stripeCustomerId },
         {

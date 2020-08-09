@@ -16,6 +16,7 @@ const Payments = mongoose.model('Payments', paymentsSchema);
 export default Payments;
 
 export const createPayment = async (user, amount_paid, currency, meta = {}) => {
+	console.log({ user, amount_paid, currency });
 	let record = new Payments({ user, amount_paid, currency, meta });
 	let ret = await record.save();
 	return ret;

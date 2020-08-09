@@ -51,6 +51,8 @@ class UserController {
     const encryptedString = cryptr.encrypt(email);
     let record = new User({ name, email, password, encryptedString });
     try {
+      let emailExists = await User.findOne({ email });
+      if (emailExists) return res.status(400).send({ message: 'Email address already exists.' });
       let ret = await record.save();
       const APIEMAIL = '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';
       sgMail.setApiKey(APIEMAIL);
@@ -67,8 +69,6 @@ class UserController {
         Thanks,<br/><br/>
         Team Phantompod!`,
       };
-
-      console.log('msg : ', msg);
 
       sgMail.send(msg).then(
         () => {},
