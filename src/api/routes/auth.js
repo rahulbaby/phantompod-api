@@ -31,7 +31,7 @@ router.get(
 router.route('/google/signin').get(async (req, res, next) => {
   try {
     console.log(req.user);
-    return res.send({ req: JSON.stringify(req), kex: 'kex' });
+    return res.send({ req: req.user, kex: 'kex' });
   } catch (error) {
     let message = error.message || `Something went wrong!`;
     return res.status(400).send({ message, error });
