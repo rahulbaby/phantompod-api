@@ -28,9 +28,10 @@ router.get(
   },
 );
 */
-router
-  .route('/google/signin')
-  .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res, next) => {
+router.get(
+  '/google/signin',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
     try {
       console.log('user', req.user);
       return res.send({ user: req.user, user2: 'hell' });
@@ -39,6 +40,7 @@ router
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
-  });
+  },
+);
 
 export default router;
