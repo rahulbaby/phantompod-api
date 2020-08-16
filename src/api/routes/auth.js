@@ -28,14 +28,16 @@ router.get(
   },
 );
 */
-router.route('/google/signin').get(async (req, res, next) => {
-  try {
-    console.log(req.user);
-    return res.send({ user: req.user, kex: 'kex' });
-  } catch (error) {
-    let message = error.message || `Something went wrong!`;
-    return res.status(400).send({ message, error });
-  }
-});
+router
+  .route('/google/signin')
+  .get(passport.authenticate('google', { failureRedirect: '/login' }), async (req, res, next) => {
+    try {
+      console.log('user', req.user);
+      return res.send({ user: req.user, user2: 'hell' });
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  });
 
 export default router;
