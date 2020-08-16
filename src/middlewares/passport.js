@@ -66,3 +66,17 @@ passport.use(
     },
   ),
 );
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: google.OAuth.GOOGLE_CLIENT_ID,
+      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
+      callbackURL: `${app.baseUrl}/auth/google/signin`,
+    },
+    function (accessToken, refreshToken, profile, done) {
+      let user = profile;
+      return done(err, user);
+    },
+  ),
+);
