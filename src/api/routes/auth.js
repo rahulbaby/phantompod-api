@@ -20,7 +20,7 @@ router.get(
   passport.authenticate('google', { failureRedirect: `${app.webUrl}/login` }),
   (req, res) => {
     console.log(req.user);
-    res.send(JSON.stringify(req));
+    res.send({ req: JSON.stringify(req), kex: 'kex' });
     //res.redirect(`${app.webUrl}/`);
   },
 );
