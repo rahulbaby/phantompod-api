@@ -56,12 +56,13 @@ passport.use(
     },
     async function (accessToken, refreshToken, profile, done) {
       const { name, email } = profile._json;
+      console.log('profile._json', profile._json);
       try {
-        const user = await UserModel.findOne({ email });
-        done(null, user);
+        //const user = await UserModel.findOne({ email });
+        done(null, profile._json);
       } catch (error) {
         console.log('error in catch', error);
-        done(error);
+        done({ error });
       }
     },
   ),

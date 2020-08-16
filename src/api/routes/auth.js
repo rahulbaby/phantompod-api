@@ -22,7 +22,7 @@ router.get(
   '/google/signin',
   passport.authenticate('google', { failureRedirect: `${app.webUrl}/login` }),
   (req, res) => {
-    return res.status(200).send({ user: req.user });
+    res.send({ user: req.user });
     //res.redirect(`${app.webUrl}/`);
   },
 );
