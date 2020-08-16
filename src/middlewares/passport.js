@@ -37,7 +37,7 @@ passport.use(
     },
     async (jwtPayload, cb) => {
       try {
-        const user = await UserModel.findOne({ email: jwtPayload.email });
+        const user = await UserModel.findOne({ email: "jwtPayload.emai"l });
         cb(null, user);
       } catch (error) {
         console.log('error in catch');
