@@ -8,8 +8,7 @@ const router = Router();
 router.route('/login').post(Auth.login);
 router.route('/details').post(Auth.userDetails);
 
-router.get(
-  '/google',
+router.route('/google').get(
   passport.authenticate('google', {
     scope: [
       'https://www.googleapis.com/auth/plus.login',
@@ -28,10 +27,10 @@ router.get(
   },
 );
 */
-router.get(
-  '/google/signin',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
+
+router
+  .route('/google/signin')
+  .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
     try {
       console.log('user', req.user);
       return res.send({ user: req.user, user2: 'hell' });
@@ -40,7 +39,6 @@ router.get(
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
-  },
-);
+  });
 
 export default router;
