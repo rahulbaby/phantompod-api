@@ -56,7 +56,7 @@ passport.use(
     },
     async function (accessToken, refreshToken, profile, done) {
       console.log({ accessToken, refreshToken, profile });
-      const { name, email } = profile._json;
+      const { name, email, picture } = profile;
       try {
         const user = await UserModel.findOne({ email });
         done(null, user);
