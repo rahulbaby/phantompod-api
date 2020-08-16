@@ -18,14 +18,24 @@ router.get(
   }),
 );
 
+/*
 router.get(
   '/google/signin',
-  //passport.authenticate('google', { failureRedirect: `${app.webUrl}/login` }),
   (req, res) => {
     console.log(req.user);
     res.send({ req: JSON.stringify(req), kex: 'kex' });
     //res.redirect(`${app.webUrl}/`);
   },
 );
+*/
+router.route('/google/signin').get(async (req, res, next) => {
+  try {
+    console.log(req.user);
+    return res.send({ req: JSON.stringify(req), kex: 'kex' });
+  } catch (error) {
+    let message = error.message || `Something went wrong!`;
+    return res.status(400).send({ message, error });
+  }
+});
 
 export default router;
