@@ -30,11 +30,12 @@ router.get(
 */
 router
   .route('/google/signin')
-  .get(passport.authenticate('google', { failureRedirect: '/login' }), async (req, res, next) => {
+  .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res, next) => {
     try {
       console.log('user', req.user);
       return res.send({ user: req.user, user2: 'hell' });
     } catch (error) {
+      console.log('error', error);
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
