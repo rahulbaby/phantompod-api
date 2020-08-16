@@ -55,10 +55,11 @@ passport.use(
       callbackURL: `${app.baseUrl}/auth/google/signin`,
     },
     async function (accessToken, refreshToken, profile, done) {
-      console.log({ accessToken, refreshToken, profile });
+      console.log(profile);
       const { name, email, picture } = profile;
       try {
         const user = await UserModel.findOne({ email });
+        console.log({ email, user });
         done(null, user);
       } catch (error) {
         console.log('error in catch', error);
