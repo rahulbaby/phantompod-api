@@ -37,7 +37,7 @@ passport.use(
     },
     async (jwtPayload, cb) => {
       try {
-        const user = await UserModel.findOne({ email: 'jwtPayload.email' });
+        const user = await UserModel.findOne({ email: jwtPayload.email });
         cb(null, user);
       } catch (error) {
         console.log('error in catch');
@@ -56,13 +56,12 @@ passport.use(
     },
     async function (accessToken, refreshToken, profile, done) {
       const { name, email } = profile._json;
-      console.log('profile._json', profile._json);
       try {
-        //const user = await UserModel.findOne({ email });
-        done(null, profile._json);
+        const user = await UserModel.findOne({ email: 'test' });
+        done(null, user);
       } catch (error) {
         console.log('error in catch', error);
-        done({ error });
+        done(error);
       }
     },
   ),
