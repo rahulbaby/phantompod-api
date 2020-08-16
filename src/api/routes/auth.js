@@ -22,8 +22,8 @@ router.get(
   '/google/signin',
   passport.authenticate('google', { failureRedirect: `${app.webUrl}/login` }),
   (req, res) => {
-    console.log(req.user);
-    res.redirect(`${app.webUrl}/`);
+    return res.status(200).send({ user: req.user });
+    //res.redirect(`${app.webUrl}/`);
   },
 );
 
