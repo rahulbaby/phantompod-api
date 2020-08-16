@@ -3,7 +3,7 @@ import UserModel from 'models/user';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
 
-const GoogleStrategy = require('passport-google-oauth').OAuthStrategy;
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = passportJWT.Strategy;
@@ -50,13 +50,19 @@ passport.use(
 passport.use(
   new GoogleStrategy(
     {
-      consumerKey: google.OAuth.GOOGLE_CLIENT_ID,
-      consumerSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
+      clientID: google.OAuth.GOOGLE_CLIENT_ID,
+      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
       callbackURL: `${app.baseUrl}/auth/google/signin`,
     },
-    function (accessToken, refreshToken, profile, done) {
-      let user = profile;
-      return done(err, user);
+    async function (accessToken, refreshToken, profile, done) {
+      const { name, email } = profile._json;
+      try {
+        const user = await UserModel.findOne({ email });
+        done(null, user);
+      } catch (error) {
+        console.log('error in catch', error);
+        done(error);
+      }
     },
   ),
 );
