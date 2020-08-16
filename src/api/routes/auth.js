@@ -12,13 +12,8 @@ router.get('/google', (req, res) => {
   return res.status(404);
 });
 
-router.get(
-  '/google/signin',
-  passport.authenticate('google', { failureRedirect: `${app.webUrl}/login` }),
-  (req, res) => {
-    console.log(req.user);
-    res.redirect(`${app.webUrl}/`);
-  },
-);
+router.get('/google/signin', (req, res) => {
+  return res.status(404);
+});
 
 export default router;
