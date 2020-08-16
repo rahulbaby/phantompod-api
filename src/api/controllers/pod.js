@@ -1,5 +1,6 @@
 import Pod from 'models/pod';
 import User from 'models/user';
+import { getRow } from 'models/settings';
 import ShortUniqueId from 'short-unique-id';
 
 import config from 'config';
@@ -8,7 +9,6 @@ import { _ } from 'underscore';
 import { podMemeberStatus } from 'base/constants';
 import { toMongoObjectId } from 'db';
 
-const POD_COUNT = config.get('trialSubscription.POD_COUNT');
 const uid = new ShortUniqueId({ length: 8 });
 
 class PodController {
@@ -62,6 +62,7 @@ class PodController {
     );
 
     try {
+      const POD_COUNT = await getRow('trialPodCount');
       const activePods = await Pod.paginate({
         $or: [
           { userId },
@@ -88,7 +89,7 @@ class PodController {
       _id = ret._id;
       return res.send({ _id });
     } catch (error) {
-      let message = error.message || `Something went wrong!`;
+      let message = error?.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
   };
@@ -154,13 +155,14 @@ class PodController {
     let record = await Pod.findOne({ _id: podId });
     if (!record) return res.status(500).send({ message: "Pod doesn't exists" });
     if (record.userId.toString() !== userId.toString())
-      return res.status(500).send({ message: "You don' have permission" });
+      return res.status(500).send({ message: "You don't have permission" });
 
     let existing = record.members.findIndex(x => x.userId.toString() == memberId.toString());
     if (existing < 0) return res.status(500).send({ message: "Member doesn't exists" });
     record.members[existing].status = status;
 
     try {
+      const POD_COUNT = await getRow('trialPodCount');
       if (status === podMemeberStatus.ACCEPTED) {
         const member = await User.findOne({ _id: memberId });
         const activePods = await Pod.paginate({
@@ -170,9 +172,7 @@ class PodController {
           ],
         });
         if (activePods.total >= POD_COUNT && member.onTrial)
-          return res
-            .status(400)
-            .send({ message: `No more than ${POD_COUNT} pods allowded for trial account` });
+          return res.status(400).send({ message: `The member restricted to join any more pods!` });
         if (!member.isActive && !member.onTrial)
           return res.status(400).send({ message: `User doesn't have any active plans!` });
       }

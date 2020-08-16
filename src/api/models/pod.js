@@ -51,7 +51,7 @@ const podSchema = new Schema(
 	{ timestamps: true },
 );
 
-podSchema.plugin(uniqueValidator, { message: 'is already taken.' });
+podSchema.plugin(uniqueValidator, { message: 'This podname already registered!' });
 podSchema.plugin(paginatePlugin);
 
 podSchema.statics.getPodRow = function (query) {

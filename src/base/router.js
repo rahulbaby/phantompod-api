@@ -12,6 +12,7 @@ import user from 'routes/user';
 import pod from 'routes/pod';
 import post from 'routes/post';
 import admin from 'routes/admin';
+import settings from 'routes/settings';
 
 const cryptr = new Cryptr('pass123');
 
@@ -24,6 +25,7 @@ router.use('/pod', passport.authenticate('jwt', { session: false }), pod);
 router.use('/post', passport.authenticate('jwt', { session: false }), post);
 router.use('/notification', passport.authenticate('jwt', { session: false }), notification);
 router.use('/admin', passport.authenticate('jwt', { session: false }), admin);
+router.use('/settings', passport.authenticate('jwt', { session: false }), settings);
 
 router.route('/items').get((req, res, next) => {
 	const items = require('../enums/items');

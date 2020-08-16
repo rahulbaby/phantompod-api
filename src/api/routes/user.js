@@ -31,6 +31,10 @@ router
 	.route('/update-profile-image')
 	.post(passport.authenticate('jwt', { session: false }), User.updateProfileImage);
 
+router
+	.route('/update-profile')
+	.put(passport.authenticate('jwt', { session: false }), User.updateProfile);
+
 router.route('/dashboard').get(passport.authenticate('jwt', { session: false }), Dashboard.index);
 
 export default router;

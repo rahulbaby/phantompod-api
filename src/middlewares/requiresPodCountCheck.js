@@ -1,13 +1,13 @@
 import config from 'config';
 import Pod from 'models/pod';
-
-const POD_COUNT = config.get('trialSubscription.POD_COUNT');
+import { getRow } from 'models/settings';
 
 const middleWareFun = () => {
 	return async (req, res, next) => {
 		if (req.user.isActive) {
 			next();
 		} else {
+			const POD_COUNT = await getRow('trialPodCount');
 			let query = [{ 'members.userId': req.user._id }, { userId: req.user._id }];
 			let podCount = await Pod.count(query);
 			if (podCount >= POD_COUNT)

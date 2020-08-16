@@ -26,8 +26,8 @@ module.exports = {
   },
   google: {
     OAuth: {
-      GOOGLE_CLIENT_ID: '642915743730-334e9pv6ugserg7v16k1q64tflugf6fq.apps.googleusercontent.com',
-      GOOGLE_CLIENT_SECRET: 'cbYGeefT1f2I01BlH1BUYLZQ',
+      GOOGLE_CLIENT_ID: '623352957166-hg40u5m296b2sfu7c1nlcq60pl6nlkdm.apps.googleusercontent.com',
+      GOOGLE_CLIENT_SECRET: 'RSMp9rWwzqjaQzKRi2EM93YB',
     },
   },
   stripe: {

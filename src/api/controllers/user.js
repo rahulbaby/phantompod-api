@@ -135,6 +135,19 @@ class UserController {
     }
   };
 
+  updateProfile = async (req, res, next) => {
+    const userId = req.user._id;
+    let record = _.pick(req.body, 'name', 'email');
+
+    try {
+      const result = await User.findByIdAndUpdate(userId, record);
+      return res.send(result);
+    } catch (error) {
+      let message = error.message || `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
   updateLinkeinid = async (req, res, next) => {
     const userId = req.user._id;
     let ok = JSON.stringify(req.body);
@@ -210,10 +223,11 @@ class UserController {
     const { oldPassword, newPassword } = req.body;
 
     req.user.comparePassword(oldPassword, async (err, isMatch) => {
-      if (!isMatch) return res.status(400).send({ message: 'Wrong password' });
+      if (!isMatch) return res.status(400).send({ message: "Password doesn't match" });
       try {
         const user = await User.findOne({ _id: userId });
         user.password = newPassword;
+        user.billingDetails = undefined;
         let ret = await user.save();
         return res.send(ret);
       } catch (error) {
