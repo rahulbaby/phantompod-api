@@ -3,7 +3,7 @@ import UserModel from 'models/user';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
 
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var GoogleStrategy = require('passport-google-oauth').OAuthStrategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = passportJWT.Strategy;
