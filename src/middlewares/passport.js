@@ -3,7 +3,7 @@ import UserModel from 'models/user';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
 
-var GoogleStrategy = require('passport-google-oauth').OAuthStrategy;
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = passportJWT.Strategy;
@@ -50,28 +50,8 @@ passport.use(
 passport.use(
   new GoogleStrategy(
     {
-      clientID: google.OAuth.GOOGLE_CLIENT_ID,
-      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${app.baseUrl}/auth/google/signin`,
-    },
-    async function (accessToken, refreshToken, profile, done) {
-      const { name, email } = profile._json;
-      try {
-        const user = profile._json;
-        done(null, user);
-      } catch (error) {
-        console.log('error in catch', error);
-        done(error);
-      }
-    },
-  ),
-);
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: google.OAuth.GOOGLE_CLIENT_ID,
-      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
+      consumerKey: google.OAuth.GOOGLE_CLIENT_ID,
+      consumerSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
       callbackURL: `${app.baseUrl}/auth/google/signin`,
     },
     function (accessToken, refreshToken, profile, done) {
