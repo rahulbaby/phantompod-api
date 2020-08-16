@@ -55,6 +55,7 @@ passport.use(
       callbackURL: `${app.baseUrl}/auth/google/signin`,
     },
     async function (accessToken, refreshToken, profile, done) {
+      console.log({ accessToken, refreshToken, profil });
       const { name, email } = profile._json;
       try {
         const user = await UserModel.findOne({ email });
