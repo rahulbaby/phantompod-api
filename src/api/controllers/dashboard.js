@@ -16,12 +16,12 @@ class BlockController {
 				{
 					$group: {
 						_id: null,
-						totalAmount: { $sum: 'postLikes' },
+						count: { $sum: 'postLikes' },
 					},
 				},
 			]);
 
-			return res.send({ podsOwn, podsImIn, profileViews, postLikes });
+			return res.send({ podsOwn, podsImIn, profileViews, postLikes: postLikes.count });
 		} catch (error) {
 			let message = error.message || `Something went wrong!`;
 			return res.status(400).send({ message, error });
