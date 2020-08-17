@@ -34,7 +34,7 @@ router.get(
 
 router
   .route('/google/signin')
-  .get(passport.authenticate('google'),(req,res)=>{
+  .get((req,res)=>{
     console.log('user :',req);
   })
   // , (req, res) => {
