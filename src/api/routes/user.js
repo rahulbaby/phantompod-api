@@ -36,5 +36,8 @@ router
 	.put(passport.authenticate('jwt', { session: false }), User.updateProfile);
 
 router.route('/dashboard').get(passport.authenticate('jwt', { session: false }), Dashboard.index);
+router
+	.route('/dashboard-posts')
+	.get(passport.authenticate('jwt', { session: false }), Dashboard.postsByLike);
 
 export default router;
