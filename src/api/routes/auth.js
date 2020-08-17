@@ -31,7 +31,7 @@ router.get(
 router.route('/google/signin').get((req, res) => {
   try {
     console.log('user', req.user);
-    return res.send({ gAuth: 'gAuth', email: req.user });
+    return res.send({ gAuthssss: 'gAuthxxxx', email: req.user });
   } catch (error) {
     console.log('error', error);
     let message = error.message || `Something went wrong!`;
