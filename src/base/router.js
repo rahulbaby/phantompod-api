@@ -13,6 +13,7 @@ import pod from 'routes/pod';
 import post from 'routes/post';
 import admin from 'routes/admin';
 import settings from 'routes/settings';
+import cron from './cron';
 
 const cryptr = new Cryptr('pass123');
 
@@ -21,6 +22,8 @@ const router = Router();
 router.use('/auth', auth);
 router.use('/user', user);
 router.use('/stripe', stripe);
+router.use('/cron', cron);
+
 router.use('/pod', passport.authenticate('jwt', { session: false }), pod);
 router.use('/post', passport.authenticate('jwt', { session: false }), post);
 router.use('/notification', passport.authenticate('jwt', { session: false }), notification);
