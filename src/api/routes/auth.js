@@ -28,20 +28,20 @@ router.get(
 );
 */
 
-router.route('/google/signin').get(
-  passport.authenticate('google', { 
-    successRedirect: '/',
-    failureRedirect: '/login'
-}),
-);
+// router.route('/google/signin').get(
+//   passport.authenticate('google', { 
+//     successRedirect: '/',
+//     failureRedirect: '/login'
+// }),
+// );
 
-// router.get('/auth/google/signin',passport.authenticate('google', { 
-//   successRedirect: '/',
-//   failureRedirect: '/login'
-// },(req,res)=>{
-//   console.log('req sucess =======>',req);
-// })
-// )
+router.get('/google/signin',passport.authenticate('google', { 
+  successRedirect: '/',
+  failureRedirect: '/login'
+},(req,res)=>{
+  console.log('req sucess =======>',req);
+})
+)
 
 
 
