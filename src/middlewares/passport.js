@@ -54,13 +54,13 @@ passport.use(
       clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
       callbackURL: `${app.baseUrl}/auth/google/signin`,
     },
-    function (accessToken, refreshToken, profile, done) {
+    (accessToken, refreshToken, profile, done) => {
       const { name, email, picture } = profile._json;
       try {
         //const user = await UserModel.findOne({ email });
         console.log({ email, user });
         req.user = profile._json;
-        done();
+        done(null, profile._json);
       } catch (error) {
         console.log('error in catch', error);
         done(error);
