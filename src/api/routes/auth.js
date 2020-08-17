@@ -28,17 +28,25 @@ router.get(
 );
 */
 
-router
-  .route('/google/signin')
-  .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-    try {
-      console.log('user', req);
-      return res.send({ user: req.user, user2: 'hell' });
-    } catch (error) {
-      console.log('error', error);
-      let message = error.message || `Something went wrong!`;
-      return res.status(400).send({ message, error });
-    }
-  });
+app.get( '/google/signin', 
+    passport.authenticate( 'google', { 
+        successRedirect: '/dashboard',
+        failureRedirect: '/login'
+}));
+
+
+
+// router
+//   .route('/google/signin')
+//   .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+//     try {
+//       console.log('user', req);
+//       return res.send({ user: req.user, user2: 'hell' });
+//     } catch (error) {
+//       console.log('error', error);
+//       let message = error.message || `Something went wrong!`;
+//       return res.status(400).send({ message, error });
+//     }
+//   });
 
 export default router;
