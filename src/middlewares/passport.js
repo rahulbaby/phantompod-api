@@ -2,6 +2,7 @@ import { google, authToken, app } from 'config';
 import UserModel from 'models/user';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
+var session = require('express-session');
 
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
@@ -54,10 +55,11 @@ passport.use(
       clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
       callbackURL: `${app.baseUrl}/auth/google/signin`,
     },
-    async function (accessToken, refreshToken, profile, done) {
+    function (accessToken, refreshToken, profile, done) {
       const { name, email, picture } = profile._json;
       try {
-        const user = await UserModel.findOne({ email });
+        req.session.googleEmail = email;
+        //const user = await UserModel.findOne({ email });
         console.log({ email, user });
         done(null, user);
       } catch (error) {

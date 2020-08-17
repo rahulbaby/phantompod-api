@@ -15,10 +15,20 @@ import 'middlewares/passport';
 import { connectDb } from './db';
 
 const app = express();
+var session = require('express-session');
+
 const onProduction = process.env.NODE_ENV === 'production';
 
 app.disable('x-powered-by');
 app.set('port', config.get('app.port'));
+app.use(
+  session({
+    secret: 'phantompods_session_SSRR',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 10000 },
+  }),
+);
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
