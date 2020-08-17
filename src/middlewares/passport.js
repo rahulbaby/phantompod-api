@@ -57,10 +57,9 @@ passport.use(
     (accessToken, refreshToken, profile, done) => {
       const { name, email, picture } = profile._json;
       try {
-        //const user = await UserModel.findOne({ email });
-        console.log({ email, user });
-        req.user = profile._json;
-        done(null, profile._json);
+        const user = profile._json;
+        console.log('xxxxxxxxx', { email, user });
+        done(null, user);
       } catch (error) {
         console.log('error in catch', error);
         done(error);
