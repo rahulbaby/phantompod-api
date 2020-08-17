@@ -35,12 +35,9 @@ router.get(
 // }),
 // );
 
-router.get('/google/signin',passport.authenticate('google', { 
-  successRedirect: '/',
-  failureRedirect: '/login'
-}),(req,res)=>{
+router.get('/google/signin',passport.authenticate('google', (req,res)=>{
   console.log('req sucess =======>',req);
-})
+})),
 
 
 
