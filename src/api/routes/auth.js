@@ -38,10 +38,10 @@ router.get(
 router.get('/google/signin',passport.authenticate('google', { 
   successRedirect: '/',
   failureRedirect: '/login'
-},(req,res)=>{
+}),(req,res)=>{
   console.log('req sucess =======>',req);
 })
-)
+
 
 
 
