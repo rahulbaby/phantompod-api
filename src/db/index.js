@@ -6,7 +6,7 @@ var connected = chalk.bold.cyan;
 var error = chalk.bold.yellow;
 var disconnected = chalk.bold.red;
 var termination = chalk.bold.magenta;
-
+mongoose.set('useFindAndModify', false);
 export const connectDb = cb => {
 	const dbURL = config.get('db.url');
 	mongoose.connect(dbURL, { useNewUrlParser: true, useCreateIndex: true });
