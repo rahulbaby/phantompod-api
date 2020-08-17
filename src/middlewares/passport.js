@@ -2,7 +2,6 @@ import { google, authToken, app } from 'config';
 import UserModel from 'models/user';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
-var session = require('express-session');
 
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
@@ -58,10 +57,10 @@ passport.use(
     function (accessToken, refreshToken, profile, done) {
       const { name, email, picture } = profile._json;
       try {
-        req.session.googleEmail = email;
         //const user = await UserModel.findOne({ email });
         console.log({ email, user });
-        done(null, user);
+        req.user = profile._json;
+        done();
       } catch (error) {
         console.log('error in catch', error);
         done(error);

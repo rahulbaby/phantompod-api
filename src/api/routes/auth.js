@@ -30,8 +30,8 @@ router.get(
 
 router.route('/google/signin').get((req, res) => {
   try {
-    console.log('user', req.session.googleEmail);
-    return res.send({ gAuth: 'gAuth', email: req.session.googleEmail });
+    console.log('user', req.user);
+    return res.send({ gAuth: 'gAuth', email: req.user });
   } catch (error) {
     console.log('error', error);
     let message = error.message || `Something went wrong!`;
