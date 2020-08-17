@@ -54,7 +54,7 @@ passport.use(
 passport.use(new GoogleStrategy({
   clientID:google.OAuth.GOOGLE_CLIENT_ID,
   clientSecret:google.OAuth.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${app.baseUrl}/auth/google/signin`,
+  callbackURL: `https://app.phantompod.co/google/signin`,
   passReqToCallback   : true
 },
 function(request, accessToken, refreshToken, profile, done) {

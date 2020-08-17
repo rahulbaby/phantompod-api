@@ -28,12 +28,18 @@ router.get(
 );
 */
 
-router.route('/google/signin').get(
-  passport.authenticate('google', { 
-    successRedirect: '/',
-    failureRedirect: '/login'
-}),
-);
+// router.route('/google/signin').get(
+//   passport.authenticate('google', { 
+//     successRedirect: '/',
+//     failureRedirect: '/login'
+// }),
+// );
+
+router.get('/auth/google/signin',passport.authenticate('google', { 
+  successRedirect: '/',
+  failureRedirect: '/login'
+})
+)
 
 
 // app.get( '/google/signin', 
