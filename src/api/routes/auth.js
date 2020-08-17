@@ -35,9 +35,15 @@ router.get(
 // }),
 // );
 
-router.get('/google/signin',passport.authenticate('google', (req,res)=>{
-  console.log('req sucess =======>',req);
-})),
+// router.get('/google/signin',passport.authenticate('google', (req,res)=>{
+//   console.log('req sucess =======>',req);
+// })),
+
+router.get("/google/signin",passport.authenticate("google"),(req,res)=>{
+  console.log('req  ====> ',req);
+  res.send(req.user);
+  res.send("you reached the redirect URI");
+});
 
 
 
