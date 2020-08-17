@@ -3,10 +3,13 @@ import UserModel from 'models/user';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
 
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+//const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = passportJWT.Strategy;
+
+
+const GoogleStrategy = require( 'passport-google-oauth2' ).Strategy;
 
 passport.use(
   new LocalStrategy(
@@ -47,15 +50,15 @@ passport.use(
   ),
 );
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: google.OAuth.GOOGLE_CLIENT_ID,
-      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${app.baseUrl}/auth/google/signin`,
-    },
-    (accessToken, refreshToken, profile, done) => {
-      const { name, email, picture } = profile._json;
+
+passport.use(new GoogleStrategy({
+  clientID:google.OAuth.GOOGLE_CLIENT_ID,
+  clientSecret:google.OAuth.GOOGLE_CLIENT_SECRET,
+  callbackURL: `${app.baseUrl}/auth/google/signin`,
+  passReqToCallback   : true
+},
+function(request, accessToken, refreshToken, profile, done) {
+  const { name, email, picture } = profile._json;
       try {
         const user = profile._json;
         console.log('xxxxxxxxx', { email, user });
@@ -64,6 +67,27 @@ passport.use(
         console.log('error in catch', error);
         done(error);
       }
-    },
-  ),
-);
+}
+));
+
+// passport.use(
+//   new GoogleStrategy(
+//     {
+//       clientID: google.OAuth.GOOGLE_CLIENT_ID,
+//       clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
+//       callbackURL: `${app.baseUrl}/auth/google/signin`,
+//       passReqToCallback   : true
+//     },
+//     (accessToken, refreshToken, profile, done) => {
+//       const { name, email, picture } = profile._json;
+//       try {
+//         const user = profile._json;
+//         console.log('xxxxxxxxx', { email, user });
+//         done(null, user);
+//       } catch (error) {
+//         console.log('error in catch', error);
+//         done(error);
+//       }
+//     },
+//   ),
+// );
