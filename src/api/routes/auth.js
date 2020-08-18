@@ -28,7 +28,6 @@ router.get(
 );
 */
 
-<<<<<<< HEAD
 router
   .route('/google/signin')
   .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
@@ -41,47 +40,5 @@ router
       return res.status(400).send({ message, error });
     }
   });
-=======
-// router.route('/google/signin').get(
-//   passport.authenticate('google', { 
-//     successRedirect: '/',
-//     failureRedirect: '/login'
-// }),
-// );
-
-// router.get('/google/signin',passport.authenticate('google', (req,res)=>{
-//   console.log('req sucess =======>',req);
-// })),
-
-router.get("/google/signin",passport.authenticate("google"),(req,res)=>{
-  console.log('req  ====> ',req);
-  res.send(req.user);
-  res.send("you reached the redirect URI");
-});
-
-
-
-
-// app.get( '/google/signin', 
-//     passport.authenticate( 'google', { 
-//         successRedirect: '/auth/google/success',
-//         failureRedirect: '/auth/google/failure'
-// }));
-
-
-// router
-//   .route('/google/signin')
-//   .get(passport.authenticate('google', {failureRedirect:'/login'}),(req, res) => {
-//     try {
-//       console.log('user', req);
-//       return res.send({ user: req.user, user2: 'hell' });
-//     } catch (error) {
-//       console.log('error', error);
-//       let message = error.message || `Something went wrong!`;
-//       return res.status(400).send({ message, error });
-//     }
-//   });
-  
->>>>>>> 002f70259fab4aed78e848a0f0978313f9dceddc
 
 export default router;

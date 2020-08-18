@@ -49,7 +49,6 @@ passport.use(
   ),
 );
 
-<<<<<<< HEAD
 passport.use(
   new GoogleStrategy(
     {
@@ -60,17 +59,6 @@ passport.use(
     },
     function (request, accessToken, refreshToken, profile, done) {
       const { name, email, picture } = profile._json;
-=======
-
-passport.use(new GoogleStrategy({
-  clientID:google.OAuth.GOOGLE_CLIENT_ID,
-  clientSecret:google.OAuth.GOOGLE_CLIENT_SECRET,
-  callbackURL: `https://app.phantompod.co/api/auth/google/signin`,
-  passReqToCallback   : true
-},
-function(request, accessToken, refreshToken, profile, done) {
-  const { name, email, picture } = profile._json;
->>>>>>> 002f70259fab4aed78e848a0f0978313f9dceddc
       try {
         const user = profile._json;
         console.log('xxxxxxxxx', { email, user });
@@ -82,7 +70,6 @@ function(request, accessToken, refreshToken, profile, done) {
     },
   ),
 );
-
 
 // passport.use(
 //   new GoogleStrategy(
