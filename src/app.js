@@ -76,9 +76,7 @@ app.get(
     failureRedirect: '/',
   }),
   (req, res) => {
-    const user = profile._json;
-    console.log('user', user);
-    return res.send({ profile: user, token: req.user.token });
+    return res.send({ profile: req.profile, token: req.user.token });
   },
 );
 
