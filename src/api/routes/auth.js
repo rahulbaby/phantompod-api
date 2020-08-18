@@ -23,7 +23,7 @@ router
   .route('/google/signin')
   .get(passport.authenticate('google', { failureRedirect: '/login' }), async (req, res) => {
     try {
-      const { email } = req.user.profile;
+      const { name, picture, email } = req.user.profile;
       const user = await UserModel.findOne({ email });
       let redirectTo = app.webUrl;
       if (user) {
@@ -32,8 +32,13 @@ router
         });
 
         res.redirect(`${redirectTo}/gauth-response?token=${token}`);
-      } else {
-        //let record = new User({ name, email, password, encryptedString });
+      } else if (email) {
+        const userObject = { name, email, password, emailVerified: true };
+        let record = new User(userObject);
+        const token = jwt.sign(userObject.toJSON(), authToken.jwtSecret, {
+          expiresIn: '10h',
+        });
+        res.redirect(`${redirectTo}/gauth-response?token=${token}`);
       }
       res.redirect(`${redirectTo}/gauth-response`);
     } catch (error) {
