@@ -38,6 +38,7 @@ router
         const token = jwt.sign(userObject, authToken.jwtSecret, {
           expiresIn: '10h',
         });
+        await record.save();
         res.redirect(`${redirectTo}/gauth-response?token=${token}`);
       }
       res.redirect(`${redirectTo}/gauth-response`);
