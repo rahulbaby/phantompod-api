@@ -49,24 +49,21 @@ passport.use(
   ),
 );
 
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = google.OAuth;
+
 passport.use(
   new GoogleStrategy(
     {
-      clientID: google.OAuth.GOOGLE_CLIENT_ID,
-      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
+      clientID: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
       callbackURL: `${app.baseUrl}/auth/google/signin`,
       passReqToCallback: true,
     },
     function (request, accessToken, refreshToken, profile, done) {
-      const { name, email, picture } = profile._json;
-      try {
-        const user = profile._json;
-        console.log('xxxxxxxxx', { email, user });
-        done(null, user);
-      } catch (error) {
-        console.log('error in catch', error);
-        done(error);
-      }
+      console.log('profile', profile);
+      User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        return done(err, user);
+      });
     },
   ),
 );

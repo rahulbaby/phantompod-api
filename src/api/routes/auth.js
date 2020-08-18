@@ -8,7 +8,7 @@ const router = Router();
 router.route('/login').post(Auth.login);
 router.route('/details').post(Auth.userDetails);
 
-router.route('/google').get(
+router.route('/google2').get(
   passport.authenticate('google', {
     scope: [
       'https://www.googleapis.com/auth/plus.login',

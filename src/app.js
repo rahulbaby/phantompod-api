@@ -66,16 +66,18 @@ app.use(express.static('uploads'));
 app.use(passport.initialize());
 
 app.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['https://www.googleapis.com/auth/plus.login'],
+  }),
+);
+
+app.get(
   '/auth/google/signin',
   passport.authenticate('google', {
-    //successRedirect: '/',
-    failureRedirect: '/',
-    session: false,
+    successRedirect: '/auth/google/success',
+    failureRedirect: '/auth/google/failure',
   }),
-  function (req, res) {
-    var token = AuthService.encode(req.user);
-    res.redirect('/home?token=' + token);
-  },
 );
 
 app.use(router);
