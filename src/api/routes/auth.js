@@ -17,17 +17,12 @@ router.route('/google').get(
   }),
 );
 
-router.get('/google/signin', (req, res) => {
-  console.log('profile: req.profile', req.user.profile);
-  return res.send({ profile: req.user.profile, token: req.user.token });
-});
-
 router
-  .route('/google/signin2')
+  .route('/google/signin')
   .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
     try {
-      console.log('user', req.user);
-      return res.send({ user: req.user, user2: 'hell' });
+      console.log('profile: req.profile', req.user.profile);
+      return res.send({ profile: req.user.profile, token: req.user.token });
     } catch (error) {
       console.log('error', error);
       let message = error.message || `Something went wrong!`;
