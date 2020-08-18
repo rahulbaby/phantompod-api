@@ -34,7 +34,7 @@ router
         res.redirect(`${redirectTo}/gauth-response?token=${token}`);
       } else if (email) {
         const userObject = { name, email, password, emailVerified: true };
-        let record = new User(userObject);
+        let record = new UserModel(userObject);
         const token = jwt.sign(userObject.toJSON(), authToken.jwtSecret, {
           expiresIn: '10h',
         });
