@@ -29,7 +29,7 @@ router.get(
 */
 
 router
-  .route('/google/signin')
+  .route('/google/signin2')
   .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
     try {
       console.log('user', req.user);
