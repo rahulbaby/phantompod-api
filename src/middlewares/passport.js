@@ -65,6 +65,7 @@ passport.use(
       callbackURL: `https://app.phantompod.co/api/auth/google/signin`,
     },
     (token, refreshToken, profile, done) => {
+      console.log('profile @ passport', profile);
       return done(null, {
         profile: profile,
         token: token,
