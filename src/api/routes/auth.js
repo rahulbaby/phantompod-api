@@ -1,3 +1,4 @@
+import { authToken } from 'config';
 import { Router } from 'express';
 import passport from 'passport';
 import { app } from 'config';
@@ -24,7 +25,12 @@ router
     try {
       const { email } = req.user.profile;
       const user = await UserModel.findOne({ email });
-      return res.json({ user });
+
+      const token = jwt.sign(user.toJSON(), authToken.jwtSecret, {
+        expiresIn: '10h',
+      });
+
+      return res.json({ token });
     } catch (error) {
       console.log('error', error);
       let message = error.message || `Something went wrong!`;
