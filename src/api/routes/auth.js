@@ -2,6 +2,7 @@ import { Router } from 'express';
 import passport from 'passport';
 import { app } from 'config';
 import Auth from 'controllers/auth';
+import UserModel from 'models/user';
 
 const router = Router();
 
@@ -19,10 +20,11 @@ router.route('/google').get(
 
 router
   .route('/google/signin')
-  .get(passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  .get(passport.authenticate('google', { failureRedirect: '/login' }), async (req, res) => {
     try {
-      console.log('profile: req.profile', req.user.profile);
-      return res.send({ profile: req.user.profile, token: req.user.token });
+      const { email } = req.user.profile;
+      const user = await UserModel.findOne({ email });
+      return res.json({ user });
     } catch (error) {
       console.log('error', error);
       let message = error.message || `Something went wrong!`;
