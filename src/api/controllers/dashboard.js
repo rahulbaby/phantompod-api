@@ -23,7 +23,7 @@ class BlockController {
 
 			return res.send({ podsOwn, podsImIn, profileViews, postLikes: postLikes.count });
 		} catch (error) {
-			let message = error.message || `Something went wrong!`;
+			let message = error.message || `Something went wrong fetching stastics!`;
 			return res.status(400).send({ message, error });
 		}
 	};
