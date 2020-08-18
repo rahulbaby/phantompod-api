@@ -54,9 +54,9 @@ const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = google.OAuth;
 passport.use(
   new GoogleStrategy(
     {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `${app.baseUrl}/auth/google/signin`,
+      clientID: '642915743730-e22s4k165v54g16su0meqq01biiufng4.apps.googleusercontent.com',
+      clientSecret: '8nJbidwgtXf7ryIpeS-PmaDj',
+      callbackURL: `https://app.phantompod.co/auth/google/signin`,
       passReqToCallback: true,
     },
     function (request, accessToken, refreshToken, profile, done) {
