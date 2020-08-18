@@ -1,6 +1,7 @@
 import express from 'express';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
+import cookieSession from 'cookie-session';
 import bodyParser from 'body-parser';
 import http from 'http';
 import https from 'https';
@@ -21,14 +22,6 @@ const onProduction = process.env.NODE_ENV === 'production';
 
 app.disable('x-powered-by');
 app.set('port', config.get('app.port'));
-app.use(
-  session({
-    secret: 'phantompods_session_SSRR',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 10000 },
-  }),
-);
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -37,6 +30,12 @@ app.use(
     extended: false,
     keepExtensions: true,
     uploadDir: __dirname + '/uploads',
+  }),
+);
+app.use(
+  cookieSession({
+    name: 'session',
+    keys: ['123'],
   }),
 );
 app.use(cookieParser());
@@ -68,16 +67,17 @@ app.use(passport.initialize());
 app.get(
   '/auth/google',
   passport.authenticate('google', {
-    scope: ['https://www.googleapis.com/auth/plus.login'],
+    scope: ['https://www.googleapis.com/auth/userinfo.profile'],
   }),
 );
-
 app.get(
-  '/auth/google/signin',
+  '/auth/google/callback',
   passport.authenticate('google', {
-    successRedirect: '/auth/google/success',
-    failureRedirect: '/auth/google/failure',
+    failureRedirect: '/',
   }),
+  (req, res) => {
+    return res.send(req.profile);
+  },
 );
 
 app.use(router);

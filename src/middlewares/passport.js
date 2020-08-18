@@ -51,18 +51,23 @@ passport.use(
 
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = google.OAuth;
 
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
 passport.use(
   new GoogleStrategy(
     {
       clientID: '642915743730-e22s4k165v54g16su0meqq01biiufng4.apps.googleusercontent.com',
       clientSecret: '8nJbidwgtXf7ryIpeS-PmaDj',
       callbackURL: `https://app.phantompod.co/api/auth/google/signin`,
-      passReqToCallback: true,
     },
-    function (request, accessToken, refreshToken, profile, done) {
-      console.log('profile', profile);
-      User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        return done(err, user);
+    (token, refreshToken, profile, done) => {
+      return done(null, {
+        profile: profile,
+        token: token,
       });
     },
   ),
