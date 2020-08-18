@@ -31,7 +31,7 @@ router
           expiresIn: '10h',
         });
 
-        res.redirect(`${redirectTo}/gauth-response?token=${token}`);
+        res.redirect(`${app.webUrl}/gauth-response?token=${token}`);
       } else if (email) {
         const userObject = { name, email, emailVerified: true };
         let record = new UserModel(userObject);
@@ -39,9 +39,9 @@ router
           expiresIn: '10h',
         });
         await record.save();
-        res.redirect(`${redirectTo}/gauth-response?token=${token}`);
+        res.redirect(`${app.webUrl}/gauth-response?token=${token}`);
       }
-      res.redirect(`${redirectTo}/gauth-response`);
+      res.redirect(`${app.webUrl}/gauth-response`);
     } catch (error) {
       console.log('error', error);
       let message = error.message || `Something went wrong!`;
