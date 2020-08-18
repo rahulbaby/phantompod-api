@@ -70,25 +70,3 @@ passport.use(
     },
   ),
 );
-
-// passport.use(
-//   new GoogleStrategy(
-//     {
-//       clientID: google.OAuth.GOOGLE_CLIENT_ID,
-//       clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
-//       callbackURL: `${app.baseUrl}/auth/google/signin`,
-//       passReqToCallback   : true
-//     },
-//     (accessToken, refreshToken, profile, done) => {
-//       const { name, email, picture } = profile._json;
-//       try {
-//         const user = profile._json;
-//         console.log('xxxxxxxxx', { email, user });
-//         done(null, user);
-//       } catch (error) {
-//         console.log('error in catch', error);
-//         done(error);
-//       }
-//     },
-//   ),
-// );
