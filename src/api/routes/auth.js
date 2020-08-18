@@ -4,6 +4,7 @@ import passport from 'passport';
 import Auth from 'controllers/auth';
 import UserModel from 'models/user';
 import jwt from 'jsonwebtoken';
+import { randomPassword } from 'utils/functions';
 
 const router = Router();
 
@@ -32,7 +33,7 @@ router
 
         res.redirect(`${app.webUrl}/gauth-response?token=${token}`);
       } else if (email) {
-        const userObject = { name, email, emailVerified: true };
+        const userObject = { name, email, emailVerified: true, password: randomPassword() };
         let record = new UserModel(userObject);
         const token = jwt.sign(userObject, authToken.jwtSecret, {
           expiresIn: '10h',
