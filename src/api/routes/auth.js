@@ -1,4 +1,4 @@
-import { authToken } from 'config';
+import { authToken, app } from 'config';
 import { Router } from 'express';
 import passport from 'passport';
 import { app } from 'config';
@@ -26,16 +26,21 @@ router
     try {
       const { email } = req.user.profile;
       const user = await UserModel.findOne({ email });
+      let redirectTo = app.webUrl;
+      if (user) {
+        const token = jwt.sign(user.toJSON(), authToken.jwtSecret, {
+          expiresIn: '10h',
+        });
 
-      const token = jwt.sign(user.toJSON(), authToken.jwtSecret, {
-        expiresIn: '10h',
-      });
-
-      return res.json({ token });
+        res.redirect(`${redirectTo}/gauth-response?token=${token}`);
+      } else {
+        //let record = new User({ name, email, password, encryptedString });
+      }
+      res.redirect(`${redirectTo}/gauth-response`);
     } catch (error) {
       console.log('error', error);
       let message = error.message || `Something went wrong!`;
-      return res.status(400).send({ message, error });
+      res.redirect(`${redirectTo}/gauth-response`);
     }
   });
 
