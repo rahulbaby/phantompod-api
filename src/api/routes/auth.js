@@ -1,7 +1,6 @@
 import { authToken, app } from 'config';
 import { Router } from 'express';
 import passport from 'passport';
-import { app } from 'config';
 import Auth from 'controllers/auth';
 import UserModel from 'models/user';
 import jwt from 'jsonwebtoken';
