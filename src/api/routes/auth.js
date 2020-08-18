@@ -25,7 +25,6 @@ router
     try {
       const { name, picture, email } = req.user.profile;
       const user = await UserModel.findOne({ email });
-      let redirectTo = app.webUrl;
       if (user) {
         const token = jwt.sign(user.toJSON(), authToken.jwtSecret, {
           expiresIn: '10h',
@@ -45,7 +44,7 @@ router
     } catch (error) {
       console.log('error', error);
       let message = error.message || `Something went wrong!`;
-      res.redirect(`${redirectTo}/gauth-response`);
+      res.redirect(`${app.webUrl}/gauth-response`);
     }
   });
 
