@@ -84,6 +84,19 @@ app.use((err, req, res, next) => {
   res.send(err);
 });
 
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', {
+    //successRedirect: '/',
+    failureRedirect: '/',
+    session: false,
+  }),
+  function (req, res) {
+    var token = AuthService.encode(req.user);
+    res.redirect('/home?token=' + token);
+  },
+);
+
 const createServer = () => {
   return process.env.NODE_ENV === 'production' && false
     ? https.createServer(

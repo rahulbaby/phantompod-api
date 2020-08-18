@@ -8,8 +8,7 @@ const ExtractJWT = passportJWT.ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = passportJWT.Strategy;
 
-
-const GoogleStrategy = require( 'passport-google-oauth2' ).Strategy;
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
 passport.use(
   new LocalStrategy(
@@ -50,15 +49,16 @@ passport.use(
   ),
 );
 
-
-passport.use(new GoogleStrategy({
-  clientID:google.OAuth.GOOGLE_CLIENT_ID,
-  clientSecret:google.OAuth.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${app.baseUrl}/auth/google/signin`,
-  passReqToCallback   : true
-},
-function(request, accessToken, refreshToken, profile, done) {
-  const { name, email, picture } = profile._json;
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: google.OAuth.GOOGLE_CLIENT_ID,
+      clientSecret: google.OAuth.GOOGLE_CLIENT_SECRET,
+      callbackURL: `${app.baseUrl}/auth/google/callback`,
+      passReqToCallback: true,
+    },
+    function (request, accessToken, refreshToken, profile, done) {
+      const { name, email, picture } = profile._json;
       try {
         const user = profile._json;
         console.log('xxxxxxxxx', { email, user });
@@ -67,8 +67,9 @@ function(request, accessToken, refreshToken, profile, done) {
         console.log('error in catch', error);
         done(error);
       }
-}
-));
+    },
+  ),
+);
 
 // passport.use(
 //   new GoogleStrategy(
