@@ -8,7 +8,7 @@ const router = Router();
 router.route('/login').post(Auth.login);
 router.route('/details').post(Auth.userDetails);
 
-router.route('/google2').get(
+router.route('/google').get(
   passport.authenticate('google', {
     scope: [
       'https://www.googleapis.com/auth/plus.login',
@@ -17,16 +17,10 @@ router.route('/google2').get(
   }),
 );
 
-/*
-router.get(
-  '/google/signin',
-  (req, res) => {
-    console.log(req.user);
-    res.send({ req: JSON.stringify(req), kex: 'kex' });
-    //res.redirect(`${app.webUrl}/`);
-  },
-);
-*/
+router.get('/google/signin', (req, res) => {
+  console.log('profile: req.profile', req.user.profile);
+  return res.send({ profile: req.user.profile, token: req.user.token });
+});
 
 router
   .route('/google/signin2')

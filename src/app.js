@@ -64,6 +64,7 @@ app.use(express.static('uploads'));
 
 app.use(passport.initialize());
 
+/*
 app.get(
   '/auth/google',
   passport.authenticate('google', {
@@ -80,6 +81,7 @@ app.get(
     return res.send({ profile: req.user.profile, token: req.user.token });
   },
 );
+*/
 
 app.use(router);
 
