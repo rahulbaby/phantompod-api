@@ -62,7 +62,7 @@ passport.use(
     {
       clientID: '642915743730-e22s4k165v54g16su0meqq01biiufng4.apps.googleusercontent.com',
       clientSecret: '8nJbidwgtXf7ryIpeS-PmaDj',
-      callbackURL: `https://app.phantompod.co/api/auth/google/signin`,
+      callbackURL: `https://app.phantompod.co/api/auth/google/callba`,
     },
     (token, refreshToken, profile, done) => {
       return done(null, {
