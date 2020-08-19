@@ -2,59 +2,119 @@ import { Router } from 'express';
 import Pod from 'models/pod';
 import Post from 'models/post';
 import User from 'models/user';
+import puppeteer from 'puppeteer';
 const router = Router();
 
-const updateAnalytics = async (req, res, next) => {
-	const id = req.query.id;
-	let obj = {
-		domain: '.www.linkedin.com',
-		expirationDate: 1619110812.023159,
-		hostOnly: false,
-		httpOnly: true,
-		name: 'li_at',
-		path: '/',
-		sameSite: 'no_restriction',
-		secure: true,
-		session: false,
-		storeId: '1',
-		id: 16,
-	};
-	try {
-		let usersArr = await User.find({}); // last 30 days filtering nt done for now
-		let users = {};
-		usersArr.map(user => {
-			users[user._id] = user.linkedinCookiId;
-		});
-		let ret = [];
-		Object.keys(users).map(async userId => {
-			let posts = await Post.find({ userId });
-			if (!posts.length) return false;
-			const linkedinCookiId = users[userId]; //linkedinCookiId for the user selected
-			// loops through each post of the user selected
-			console.log(`<========USER-START -${userId}==========>`);
-			posts.map(async post => {
-				const linkedInPostUrl = post.url; // current post
+let obj = {
+	domain: '.www.linkedin.com',
+	expirationDate: 1619110812.023159,
+	hostOnly: false,
+	httpOnly: true,
+	name: 'li_at',
+	path: '/',
+	sameSite: 'no_restriction',
+	secure: true,
+	session: false,
+	storeId: '1',
+	id: 16,
+};
 
+const updateAnalytics = async (req, res, next) => {
+	try {
+		let users = await User.find({}); // last 30 days filtering nt done for now
+		let ret = [];
+
+		for (const user of users) {
+			const userId = user._id;
+			const linkedinCookiId = user.linkedinCookiId;
+			if (!linkedinCookiId) continue;
+			let posts = await Post.find({ userId });
+			if (!posts.length) continue;
+			for (const post of posts) {
+				const linkedInPostUrl = post.url;
 				let postLikes = 0;
 				let profileViews = 0;
-				// loops through each member of the pod against the post
 				/*
-						at this state we have linkedinCookiId ,comment ,  linkedInPostUrl
-						everything needed to trigger bot is available here
-						now run the bot here to feed the values to postLikes and profileViews
-					*/
-				if (!linkedinCookiId) return false;
+					at this state we have userId ,linkedInPostUrl ,  linkedInPostUrl
+					everything needed to trigger bot is available here
+					now run the bot here to feed the values to postLikes and profileViews
+				*/
+				//==============================Bot starts here======================================================
+				const browser = await puppeteer.launch({ headless: false });
+				const page = await browser.newPage();
+				function delay(time) {
+					return new Promise(function (resolve) {
+						setTimeout(resolve, time);
+					});
+				}
 				obj['value'] = linkedinCookiId;
-				//============= bot runs here for each user agains a partical post ============//
-				console.log(linkedInPostUrl);
-				console.log(userId);
-				console.log(`<-------------->`);
+				await page.setCookie(obj);
+
+				try {
+					await page.goto(linkedInPostUrl, { waitUntil: 'load', timeout: 0 });
+				} catch (e) {
+					if (e instanceof puppeteer.errors.TimeoutError) {
+						await page.setDefaultNavigationTimeout(0);
+					}
+				}
+
+				try {
+					await page.waitForSelector(
+						'[class="v-align-middle social-details-social-counts__reactions-count"]',
+					);
+				} catch (e) {
+					if (e instanceof puppeteer.errors.TimeoutError) {
+						await page.setDefaultNavigationTimeout(0);
+					}
+				}
+				const textContent = await page.evaluate(
+					() =>
+						document.querySelector(
+							'[class="v-align-middle social-details-social-counts__reactions-count"]',
+						).textContent,
+				);
+				postLikes = postLikes + textContent;
+				console.log('Post likes = ' + textContent);
+
+				try {
+					await page.goto(prof, { waitUntil: 'load', timeout: 0 });
+				} catch (e) {
+					if (e instanceof puppeteer.errors.TimeoutError) {
+						await page.setDefaultNavigationTimeout(0);
+					}
+				}
+
+				try {
+					await page.waitForSelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]');
+				} catch (e) {
+					if (e instanceof puppeteer.errors.TimeoutError) {
+						await page.setDefaultNavigationTimeout(0);
+					}
+				}
+				const view = await page.evaluate(
+					() =>
+						document.querySelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]')
+							.textContent,
+				);
+				profileViews = profileViews + view;
+				console.log('Profile views = ' + view);
+
+				await delay(4000);
+				await browser.close();
+
+				//==============================Bot ends here========================================================
+
+				ret.push({
+					userId,
+					linkedinCookiId,
+					linkedInPostUrl,
+				});
 				await Post.findOneAndUpdate({ _id: post._id }, { postLikes });
 				await User.findOneAndUpdate({ _id: userId }, { profileViews });
-			});
-			console.log(`<========USER-END -${userId}==========>`);
-		});
-		return res.send({ message: 'done' });
+			}
+		}
+
+		return res.send(ret);
 	} catch (error) {
 		let message = error.message || `Something went wrong!`;
 		return res.status(400).send({ message, error });
