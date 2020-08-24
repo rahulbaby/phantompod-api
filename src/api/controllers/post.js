@@ -165,23 +165,7 @@ class PostController {
                 for (let element of elements) element.click();
               });
             }
-            //Reading post likes and cosoling
-            try {
-              await page.waitForSelector(
-                '[class="v-align-middle social-details-social-counts__reactions-count"]',
-              );
-            } catch (e) {
-              if (e instanceof puppeteer.errors.TimeoutError) {
-                await page.setDefaultNavigationTimeout(0);
-              }
-            }
-            postLikes = await page.evaluate(
-              () =>
-                document.querySelector(
-                  '[class="v-align-middle social-details-social-counts__reactions-count"]',
-                ).textContent,
-            );
-            //end
+           
             //SHARE
             if (post.autoShare === true) {
               await delay(2000);
@@ -193,29 +177,7 @@ class PostController {
               });
             }
             //Reading profile views
-            try {
-              await page.goto(prof, { waitUntil: 'load', timeout: 0 });
-            } catch (e) {
-              if (e instanceof puppeteer.errors.TimeoutError) {
-                await page.setDefaultNavigationTimeout(0);
-              }
-            }
-
-            try {
-              await page.waitForSelector(
-                '[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]',
-              );
-            } catch (e) {
-              if (e instanceof puppeteer.errors.TimeoutError) {
-                await page.setDefaultNavigationTimeout(0);
-              }
-            }
-            profileViews = await page.evaluate(
-              () =>
-                document.querySelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]')
-                  .textContent,
-            );
-            //end
+            
             await delay(4000);
             await browser.close();
           })();
@@ -224,8 +186,7 @@ class PostController {
           `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `,
         );
       });
-      await Post.findOneAndUpdate({ _id: id }, { postLikes });
-      await User.findOneAndUpdate({ _id: req.user.id }, { profileViews });
+      
       return res.send(record);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
