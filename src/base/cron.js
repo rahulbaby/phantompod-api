@@ -18,7 +18,7 @@ let obj = {
 	storeId: '1',
 	id: 16,
 };
-
+let prof = 'https://www.linkedin.com/me/profile-views/urn:li:wvmp:summary/';
 const updateAnalytics = async (req, res, next) => {
 	try {
 		let users = await User.find({}); // last 30 days filtering nt done for now
@@ -41,6 +41,7 @@ const updateAnalytics = async (req, res, next) => {
 				cookies.push(linkedinCookiId);
 				postUrls.push(linkedInPostUrl);
 				postIds.push(post._id);
+				userIds.push(userId);
 				//await Post.findOneAndUpdate({ _id: post._id }, { postLikes });
 				//await User.findOneAndUpdate({ _id: userId }, { profileViews });
 			}
@@ -86,7 +87,7 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 			await page.setCookie(obj);
 
 			try {
-				await page.goto(postUrls[i], { waitUntil: 'load', timeout: 0 }); // sarath here i we pass i index post url
+				await page.goto(postUrls[i], { waitUntil: 'load', timeout: 0 }); // sarath here  we pass i index post url
 			} catch (e) {
 				if (e instanceof puppeteer.errors.TimeoutError) {
 					await page.setDefaultNavigationTimeout(0);
@@ -110,14 +111,38 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 			);
 			postLikes = postLikes + textContent;
 			console.log('Post likes = ' + textContent);
-			/*----------------------DB UPDATION-----------------------*/
+
+			try {
+				await page.goto(prof, { waitUntil: 'load', timeout: 0 });
+			} catch (e) {
+				if (e instanceof puppeteer.errors.TimeoutError) {
+					await page.setDefaultNavigationTimeout(0);
+				}
+			}
+
+			try {
+				await page.waitForSelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]');
+			} catch (e) {
+				if (e instanceof puppeteer.errors.TimeoutError) {
+					await page.setDefaultNavigationTimeout(0);
+				}
+			}
+			const view = await page.evaluate(
+				() =>
+					document.querySelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]')
+						.textContent,
+			);
+			profileViews = profileViews + view;
+			console.log('Profile views = ' + view);
+
+			/----------------------DB UPDATION-----------------------/;
 			try {
 				await Post.findOneAndUpdate({ _id: postIds[i] }, { postLikes });
-				await User.findOneAndUpdate({ _id: userIds[0] }, { profileViews });
+				await User.findOneAndUpdate({ _id: userIds[i] }, { profileViews });
 			} catch (e) {
 				console.log('BOT BD ERRO ', error);
 			}
-			/*----------------------DB UPDATION END-------------------*/
+			/----------------------DB UPDATION END-------------------/;
 			await delay(4000);
 		}
 		await browser.close();
