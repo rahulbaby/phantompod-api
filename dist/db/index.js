@@ -26,6 +26,8 @@ var error = _chalk.default.bold.yellow;
 var disconnected = _chalk.default.bold.red;
 var termination = _chalk.default.bold.magenta;
 
+_mongoose.default.set('useFindAndModify', false);
+
 const connectDb = cb => {
   const dbURL = _config.default.get('db.url');
 

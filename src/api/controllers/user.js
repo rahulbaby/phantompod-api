@@ -261,6 +261,22 @@ class UserController {
       }
     });
   };
+  removeProfileImage = async (req, res, next) => {
+    const userId = req.user._id;
+
+    try {
+      let record = await User.findOne({ _id: userId });
+      const imagePre = record.image;
+      deleteFile(`${UPLOAD_PATH}/${imagePre}`);
+      record.image = null;
+      let ret = await User.findOneAndUpdate({ _id: userId }, record);
+      return res.send({ message: 'Profile image removed!' });
+    } catch (error) {
+      if (req.file) deleteFile(`${UPLOAD_PATH}/${req.file.filename}`);
+      let message = `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
 }
 
 export default new UserController();

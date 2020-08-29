@@ -10,13 +10,14 @@ var _passportJwt = _interopRequireDefault(require("passport-jwt"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-
+//const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const ExtractJWT = _passportJwt.default.ExtractJwt;
 
 const LocalStrategy = require('passport-local').Strategy;
 
 const JWTStrategy = _passportJwt.default.Strategy;
+
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
 _passport.default.use(new LocalStrategy({
   usernameField: 'email',
@@ -59,23 +60,28 @@ _passport.default.use(new JWTStrategy({
   }
 }));
 
-_passport.default.use(new GoogleStrategy({
-  clientID: _config.google.OAuth.GOOGLE_CLIENT_ID,
-  clientSecret: _config.google.OAuth.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${_config.app.baseUrl}/auth/google/signin`
-}, async function (accessToken, refreshToken, profile, done) {
-  const {
-    name,
-    email
-  } = profile._json;
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET
+} = _config.google.OAuth;
 
-  try {
-    const user = await _user.default.findOne({
-      email
-    });
-    done(null, user);
-  } catch (error) {
-    console.log('error in catch', error);
-    done(error);
-  }
+_passport.default.serializeUser((user, done) => {
+  done(null, user);
+});
+
+_passport.default.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+_passport.default.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: `https://app.phantompod.co/api/auth/google/signin`
+}, (token, refreshToken, profile, done) => {
+  let user = profile._json;
+  console.log('profile @ passport', user);
+  return done(null, {
+    profile: user,
+    token: token
+  });
 }));

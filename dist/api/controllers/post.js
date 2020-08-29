@@ -9,6 +9,8 @@ var _pod = _interopRequireDefault(require("../models/pod"));
 
 var _post = _interopRequireDefault(require("../models/post"));
 
+var _user = _interopRequireDefault(require("../models/user"));
+
 var _notification = require("../models/notification");
 
 var _underscore = require("underscore");
@@ -159,77 +161,80 @@ class PostController {
         let comments = post.comments;
         let commentsLength = comments.length;
         let commentRef = 0;
+        let members = record.members.filter(x => x.linkedinCookiId && x.userId !== req.user.id);
         record.members.map(({
           userId: user
         }) => {
           commentRef = commentRef > comments.length ? commentRef = 0 : commentRef + 1;
 
-          (async () => {
-            const browser = await _puppeteer.default.launch({
-              headless: true
-            });
-            const page = await browser.newPage();
-
-            function delay(time) {
-              return new Promise(function (resolve) {
-                setTimeout(resolve, time);
+          if (user.linkedinCookiId !== null) {
+            (async () => {
+              const browser = await _puppeteer.default.launch({
+                headless: true
               });
-            }
+              const page = await browser.newPage();
 
-            obj['value'] = user.linkedinCookiId;
-            await page.setCookie(obj);
-
-            try {
-              await page.goto(post.url, {
-                waitUntil: 'load',
-                timeout: 0
-              });
-            } catch (e) {
-              if (e instanceof _puppeteer.default.errors.TimeoutError) {
-                await page.setDefaultNavigationTimeout(0);
+              function delay(time) {
+                return new Promise(function (resolve) {
+                  setTimeout(resolve, time);
+                });
               }
-            } //COMMENT
 
+              obj['value'] = user.linkedinCookiId;
+              await page.setCookie(obj);
 
-            if (post.autoComment === true) {
               try {
-                await page.type("[class='ql-editor ql-blank']", comments[commentRef]);
+                await page.goto(post.url, {
+                  waitUntil: 'load',
+                  timeout: 0
+                });
               } catch (e) {
                 if (e instanceof _puppeteer.default.errors.TimeoutError) {
                   await page.setDefaultNavigationTimeout(0);
                 }
+              } //COMMENT
+
+
+              if (post.autoComment === true) {
+                try {
+                  await page.type("[class='ql-editor ql-blank']", comments[commentRef]);
+                } catch (e) {
+                  if (e instanceof _puppeteer.default.errors.TimeoutError) {
+                    await page.setDefaultNavigationTimeout(0);
+                  }
+                }
+
+                await delay(4000);
+                await page.evaluate(() => {
+                  let elements = document.getElementsByClassName('comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3');
+
+                  for (let element of elements) element.click();
+                });
+              } //LIKE
+
+
+              if (post.autoLike === true) {
+                await page.evaluate(() => {
+                  let elements = document.getElementsByClassName('artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view');
+
+                  for (let element of elements) element.click();
+                });
+              } //SHARE
+
+
+              if (post.autoShare === true) {
+                await delay(2000);
+                await page.evaluate(() => {
+                  let elements = document.getElementsByClassName('share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view');
+
+                  for (let element of elements) element.click();
+                });
               }
 
               await delay(4000);
-              await page.evaluate(() => {
-                let elements = document.getElementsByClassName('comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3');
-
-                for (let element of elements) element.click();
-              });
-            } //LIKE
-
-
-            if (post.autoLike === true) {
-              await page.evaluate(() => {
-                let elements = document.getElementsByClassName('artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view');
-
-                for (let element of elements) element.click();
-              });
-            } //SHARE
-
-
-            if (post.autoShare === true) {
-              await delay(2000);
-              await page.evaluate(() => {
-                let elements = document.getElementsByClassName('share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view');
-
-                for (let element of elements) element.click();
-              });
-            }
-
-            await delay(4000);
-            await browser.close();
-          })();
+              await browser.close();
+            })();
+          }
 
           console.log(`USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `);
         });

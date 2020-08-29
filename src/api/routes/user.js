@@ -30,6 +30,9 @@ router
 router
 	.route('/update-profile-image')
 	.post(passport.authenticate('jwt', { session: false }), User.updateProfileImage);
+router
+	.route('/remove-profile-image')
+	.get(passport.authenticate('jwt', { session: false }), User.removeProfileImage);
 
 router
 	.route('/update-profile')

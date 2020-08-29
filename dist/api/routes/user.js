@@ -11,6 +11,8 @@ var _passport = _interopRequireDefault(require("passport"));
 
 var _user = _interopRequireDefault(require("../controllers/user"));
 
+var _dashboard = _interopRequireDefault(require("../controllers/dashboard"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const router = (0, _express.Router)();
@@ -34,5 +36,14 @@ router.route('/reset-password').post(_passport.default.authenticate('jwt', {
 router.route('/update-profile-image').post(_passport.default.authenticate('jwt', {
   session: false
 }), _user.default.updateProfileImage);
+router.route('/update-profile').put(_passport.default.authenticate('jwt', {
+  session: false
+}), _user.default.updateProfile);
+router.route('/dashboard').get(_passport.default.authenticate('jwt', {
+  session: false
+}), _dashboard.default.index);
+router.route('/dashboard-posts').get(_passport.default.authenticate('jwt', {
+  session: false
+}), _dashboard.default.postsByLike);
 var _default = router;
 exports.default = _default;

@@ -11,6 +11,8 @@ var _morgan = _interopRequireDefault(require("morgan"));
 
 var _cookieParser = _interopRequireDefault(require("cookie-parser"));
 
+var _cookieSession = _interopRequireDefault(require("cookie-session"));
+
 var _bodyParser = _interopRequireDefault(require("body-parser"));
 
 var _http = _interopRequireDefault(require("http"));
@@ -36,6 +38,9 @@ var _db = require("./db");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const app = (0, _express.default)();
+
+var session = require('express-session');
+
 const onProduction = process.env.NODE_ENV === 'production';
 app.disable('x-powered-by');
 app.set('port', _config.default.get('app.port'));
@@ -45,6 +50,10 @@ app.use(_bodyParser.default.urlencoded({
   extended: false,
   keepExtensions: true,
   uploadDir: __dirname + '/uploads'
+}));
+app.use((0, _cookieSession.default)({
+  name: 'session',
+  keys: ['123']
 }));
 app.use((0, _cookieParser.default)());
 let corsConfig = {};
@@ -70,6 +79,25 @@ app.use((0, _cors.default)(corsConfig));
 
 app.use(_express.default.static('uploads'));
 app.use(_passport.default.initialize());
+/*
+app.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['https://www.googleapis.com/auth/userinfo.profile'],
+  }),
+);
+app.get(
+  '/auth/google/signin',
+  passport.authenticate('google', {
+    failureRedirect: '/',
+  }),
+  (req, res) => {
+    console.log('profile: req.profile', req.user.profile);
+    return res.send({ profile: req.user.profile, token: req.user.token });
+  },
+);
+*/
+
 app.use(_router.default); // catch 404 and forward to error handler
 
 app.use((req, res, next) => {

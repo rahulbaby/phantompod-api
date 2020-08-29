@@ -54,6 +54,29 @@ const webUrl = _config.default.get('app.webUrl');
 
 class UserController {
   constructor() {
+    _defineProperty(this, "index", async (req, res, next) => {
+      try {
+        let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
+        let query = req.query.query ? JSON.parse(req.query.query) : {};
+        query.role = {
+          $ne: _constants.userRoles.ADMIN
+        };
+        /* query.$and = [
+          { userId: req.user._id },
+          { members: { $elemMatch: { userId: req.user._id, status: podMemeberStatus.ACCEPTED } } },
+        ];*/
+
+        let ret = await _user.default.paginate(query, paginateOptions);
+        return res.send(ret);
+      } catch (error) {
+        let message = error.message || `Something went wrong!`;
+        return res.status(400).send({
+          message,
+          error
+        });
+      }
+    });
+
     _defineProperty(this, "create", async (req, res, next) => {
       let {
         name,
@@ -69,6 +92,12 @@ class UserController {
       });
 
       try {
+        let emailExists = await _user.default.findOne({
+          email
+        });
+        if (emailExists) return res.status(400).send({
+          message: 'Email address already exists.'
+        });
         let ret = await record.save();
         const APIEMAIL = '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';
         sgMail.setApiKey(APIEMAIL);
@@ -81,12 +110,11 @@ class UserController {
           html: `<strong>Hello ${name},</strong><br/><br/>
         You are one step away from activating your Phantompod account.<br/><br/>
         Follow this link to verify your account.<br/><br/>
-        http://localhost:3000/verify-email?hash=${encryptedString}<br/><br/>
+        https://app.phantompod.co/verify-email?hash=${encryptedString}<br/><br/>
         If you didn’t create an account on Phantompod, you can ignore this email.<br/><br/>
         Thanks,<br/><br/>
         Team Phantompod!`
         };
-        console.log('msg : ', msg);
         sgMail.send(msg).then(() => {}, error => {
           console.error(error);
           console.log('error : ', error);
@@ -133,6 +161,23 @@ class UserController {
         const result = await _user.default.findByIdAndUpdate(userId, {
           billingDetails
         });
+        return res.send(result);
+      } catch (error) {
+        let message = error.message || `Something went wrong!`;
+        return res.status(400).send({
+          message,
+          error
+        });
+      }
+    });
+
+    _defineProperty(this, "updateProfile", async (req, res, next) => {
+      const userId = req.user._id;
+
+      let record = _underscore.default.pick(req.body, 'name', 'email');
+
+      try {
+        const result = await _user.default.findByIdAndUpdate(userId, record);
         return res.send(result);
       } catch (error) {
         let message = error.message || `Something went wrong!`;
@@ -241,7 +286,7 @@ class UserController {
       } = req.body;
       req.user.comparePassword(oldPassword, async (err, isMatch) => {
         if (!isMatch) return res.status(400).send({
-          message: 'Wrong password'
+          message: "Password doesn't match"
         });
 
         try {
@@ -249,6 +294,7 @@ class UserController {
             _id: userId
           });
           user.password = newPassword;
+          user.billingDetails = undefined;
           let ret = await user.save();
           return res.send(ret);
         } catch (error) {

@@ -43,7 +43,8 @@ const postSchema = new _mongoose.Schema({
   autoShare: Boolean,
   autoLike: Boolean,
   autoComment: Boolean,
-  approved: Boolean
+  approved: Boolean,
+  postLikes: Number
 }, {
   timestamps: true
 });

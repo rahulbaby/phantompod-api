@@ -9,15 +9,16 @@ var _config = _interopRequireDefault(require("config"));
 
 var _pod = _interopRequireDefault(require("../api/models/pod"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _settings = require("../api/models/settings");
 
-const POD_COUNT = _config.default.get('trialSubscription.POD_COUNT');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const middleWareFun = () => {
   return async (req, res, next) => {
     if (req.user.isActive) {
       next();
     } else {
+      const POD_COUNT = await (0, _settings.getRow)('trialPodCount');
       let query = [{
         'members.userId': req.user._id
       }, {

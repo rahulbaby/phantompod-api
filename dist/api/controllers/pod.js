@@ -9,6 +9,8 @@ var _pod = _interopRequireDefault(require("../models/pod"));
 
 var _user = _interopRequireDefault(require("../models/user"));
 
+var _settings = require("../models/settings");
+
 var _shortUniqueId = _interopRequireDefault(require("short-unique-id"));
 
 var _config = _interopRequireDefault(require("config"));
@@ -24,8 +26,6 @@ var _db = require("../../db");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-const POD_COUNT = _config.default.get('trialSubscription.POD_COUNT');
 
 const uid = new _shortUniqueId.default({
   length: 8
@@ -92,6 +92,7 @@ class PodController {
       let data = _underscore._.pick(req.body, 'isPrivate', 'name', 'description', 'comments', 'autoShare', 'autoLike', 'autoComment', 'autoValidate');
 
       try {
+        const POD_COUNT = await (0, _settings.getRow)('trialPodCount');
         const activePods = await _pod.default.paginate({
           $or: [{
             userId
@@ -124,7 +125,7 @@ class PodController {
           _id
         });
       } catch (error) {
-        let message = error.message || `Something went wrong!`;
+        let message = (error === null || error === void 0 ? void 0 : error.message) || `Something went wrong!`;
         return res.status(400).send({
           message,
           error
@@ -217,7 +218,7 @@ class PodController {
         message: "Pod doesn't exists"
       });
       if (record.userId.toString() !== userId.toString()) return res.status(500).send({
-        message: "You don' have permission"
+        message: "You don't have permission"
       });
       let existing = record.members.findIndex(x => x.userId.toString() == memberId.toString());
       if (existing < 0) return res.status(500).send({
@@ -226,6 +227,8 @@ class PodController {
       record.members[existing].status = status;
 
       try {
+        const POD_COUNT = await (0, _settings.getRow)('trialPodCount');
+
         if (status === _constants.podMemeberStatus.ACCEPTED) {
           const member = await _user.default.findOne({
             _id: memberId
@@ -243,7 +246,7 @@ class PodController {
             }]
           });
           if (activePods.total >= POD_COUNT && member.onTrial) return res.status(400).send({
-            message: `No more than ${POD_COUNT} pods allowded for trial account`
+            message: `The member restricted to join any more pods!`
           });
           if (!member.isActive && !member.onTrial) return res.status(400).send({
             message: `User doesn't have any active plans!`

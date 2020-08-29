@@ -19,6 +19,8 @@ var _utils = require("../../utils");
 
 var _user = require("../controllers/user");
 
+var _db = require("../../db");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -59,12 +61,6 @@ const billingDetailsSchema = new _mongoose.Schema({
   vatNumber: {
     type: String,
     required: true
-  },
-  role: {
-    type: String,
-    enum: Object.values(_constants.userRoles),
-    required: true,
-    default: _constants.userRoles.USER
   }
 }, {
   timestamps: true
@@ -109,6 +105,12 @@ const userSchema = new _mongoose.default.Schema({
     //required: true,
     default: null
   },
+  role: {
+    type: String,
+    //enum: Object.values(userRoles),
+    required: true,
+    default: _constants.userRoles.USER
+  },
   linkedinCookiId: {
     type: String,
     default: null
@@ -134,7 +136,8 @@ const userSchema = new _mongoose.default.Schema({
   trialDetails: {
     expiresAt: String,
     podCount: Number
-  }
+  },
+  profileViews: Number
 }, {
   timestamps: true
 });
@@ -191,6 +194,7 @@ userSchema.methods.comparePassword = function (candidatePassword, cb) {
   });
 };
 
+userSchema.plugin(_db.paginatePlugin);
 userSchema.plugin(_mongooseUniqueValidator.default, {
   message: 'is already taken.'
 });

@@ -29,6 +29,12 @@ var _pod = _interopRequireDefault(require("../api/routes/pod"));
 
 var _post = _interopRequireDefault(require("../api/routes/post"));
 
+var _admin = _interopRequireDefault(require("../api/routes/admin"));
+
+var _settings = _interopRequireDefault(require("../api/routes/settings"));
+
+var _cron = _interopRequireDefault(require("./cron"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const cryptr = new _cryptr.default('pass123');
@@ -36,6 +42,7 @@ const router = (0, _express.Router)();
 router.use('/auth', _auth.default);
 router.use('/user', _user2.default);
 router.use('/stripe', _stripe.default);
+router.use('/cron', _cron.default);
 router.use('/pod', _passport.default.authenticate('jwt', {
   session: false
 }), _pod.default);
@@ -45,6 +52,12 @@ router.use('/post', _passport.default.authenticate('jwt', {
 router.use('/notification', _passport.default.authenticate('jwt', {
   session: false
 }), _notification.default);
+router.use('/admin', _passport.default.authenticate('jwt', {
+  session: false
+}), _admin.default);
+router.use('/settings', _passport.default.authenticate('jwt', {
+  session: false
+}), _settings.default);
 router.route('/items').get((req, res, next) => {
   const items = require("../enums/items");
 
@@ -71,6 +84,17 @@ router.route('/verify-email').post(async (req, res, next) => {
       error
     });
   }
+});
+router.route('/create-admin').get(async (req, res, next) => {
+  let admin = {
+    name: 'Admin',
+    email: 'admin@admin.com',
+    password: 'admin',
+    role: 'admin'
+  };
+  let record = new _user.default(admin);
+  let ret = await record.save();
+  res.send(ret);
 });
 var _default = router;
 exports.default = _default;

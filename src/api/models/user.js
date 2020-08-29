@@ -67,7 +67,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: [true, "can't be blank"],
       match: [emailReg, 'is invalid'],
-      minlength: 5,
+      minlength: 3,
       maxlength: 255,
     },
     emailVerified: {

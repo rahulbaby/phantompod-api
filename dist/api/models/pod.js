@@ -67,7 +67,7 @@ const podSchema = new _mongoose.Schema({
   timestamps: true
 });
 podSchema.plugin(_mongooseUniqueValidator.default, {
-  message: 'is already taken.'
+  message: 'This podname already registered!'
 });
 podSchema.plugin(_db.paginatePlugin);
 
