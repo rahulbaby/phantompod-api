@@ -42,5 +42,8 @@ router.route('/dashboard').get(passport.authenticate('jwt', { session: false }),
 router
 	.route('/dashboard-posts')
 	.get(passport.authenticate('jwt', { session: false }), Dashboard.postsByLike);
+router
+	.route('/support-form')
+	.post(passport.authenticate('jwt', { session: false }), User.supportForm);
 
 export default router;

@@ -261,6 +261,7 @@ class UserController {
       }
     });
   };
+
   removeProfileImage = async (req, res, next) => {
     const userId = req.user._id;
 
@@ -273,6 +274,50 @@ class UserController {
       return res.send({ message: 'Profile image removed!' });
     } catch (error) {
       if (req.file) deleteFile(`${UPLOAD_PATH}/${req.file.filename}`);
+      let message = `Something went wrong!`;
+      return res.status(400).send({ message, error });
+    }
+  };
+
+  supportForm = async (req, res, next) => {
+    const userId = req.user._id;
+    let data = _.pick(req.body, 'subject', 'request');
+
+    try {
+      let record = await User.findOne({ _id: userId });
+      const { email, name } = record;
+
+      const APIEMAIL = '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';
+      sgMail.setApiKey(APIEMAIL);
+      const msg = {
+        to: `developer@phantompod.co`,
+        from: `developer@phantompod.co`,
+        subject: 'Support Request',
+        text: `Hello admin`,
+        html: `<table>
+          <tr><td>NAME</td><td>${name}</td></tr>
+          <tr><td>EMAIL</td><td>${email}</td></tr>
+          <tr><td>SUBJECT</td><td>${subject}</td></tr>
+          <tr><td>REQUEST</td><td>${request}</td></tr>
+        </<table>`,
+      };
+
+      sgMail.send(msg).then(
+        () => {},
+        error => {
+          console.error(error);
+
+          console.log('error : ', error);
+
+          if (error.response) {
+            console.error('check error response : ', error.response.body);
+          }
+
+          return res.send(ret);
+        },
+      );
+      res.send({ message: 'Success' });
+    } catch (error) {
       let message = `Something went wrong!`;
       return res.status(400).send({ message, error });
     }

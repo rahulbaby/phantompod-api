@@ -7,6 +7,7 @@ const memberSchema = new Schema(
 	{
 		userId: { type: Schema.Types.ObjectId, ref: 'User' },
 		name: String,
+		image: String,
 		status: {
 			type: String,
 			enum: Object.values(podMemeberStatus),

@@ -32,11 +32,20 @@ class PodController {
     try {
       let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
       let query = req.query.query ? JSON.parse(req.query.query) : {};
-      query.$and = [
+      let andOptions = [
         { isPrivate: false },
         { userId: { $ne: req.user._id } },
         { 'members.userId': { $ne: req.user._id } },
       ];
+      const search = req.query.search;
+      if (search)
+        andOptions.push({
+          $or: [
+            { name: { $regex: '.*' + search + '.*' } },
+            { description: { $regex: '.*' + search + '.*' } },
+          ],
+        });
+      query.$and = andOptions;
       let ret = await Pod.paginate(query, paginateOptions);
       return res.send(ret);
     } catch (error) {
@@ -123,7 +132,9 @@ class PodController {
     const remove = req.body.remove;
     const userId = req.user._id;
     const userName = req.user.name;
+    let message = 'Success';
 
+    if (!podKey) return res.status(500).send({ message: 'Please enter a Pod Secret.' });
     let record = await Pod.findOne({ podKey });
     if (!record) return res.status(500).send({ message: "Pod doesn't exists" });
     if (record.userId === userId) return res.status(500).send({ message: 'You own this pod.' });
@@ -133,14 +144,25 @@ class PodController {
       record.members.id(existing._id).remove();
     } else if (!existing && !remove) {
       let notificationLabel = `${userName} requested to join your pod <strong>${record.name}</strong>`;
-      await createNotification(userId, record.userId, notificationLabel, { id: record._id });
-      record.members.push({ userId, name: userName, status: podMemeberStatus.REQUESTED });
+      message = 'Your request has been sent.';
+      await createNotification(userId, record.userId, notificationLabel, {
+        id: record._id,
+        url: `pod/members?id=${record._id}&tab=${podMemeberStatus.REQUESTED}`,
+      });
+      record.members.push({
+        userId,
+        name: userName,
+        image: req.user.image,
+        status: podMemeberStatus.REQUESTED,
+      });
     } else if (existing && !remove) {
-      return res.status(400).send({ message: 'You already requested for this pod.' });
+      let message = 'You are already a member.';
+      if (existing.status === 'banned') message = 'You are currently banned from this Pod.';
+      return res.status(400).send({ message });
     }
     try {
       await record.save();
-      return res.send({ record, message: 'Success' });
+      return res.send({ record, message });
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
@@ -177,7 +199,7 @@ class PodController {
           return res.status(400).send({ message: `User doesn't have any active plans!` });
       }
 
-      let notificationLabel = `${userName} ${status} for your pod request <strong>${record.name}</strong>`;
+      let notificationLabel = `${userName} has ${status} your request to join the pod ${record.name}.`;
       await createNotification(record.userId, memberId, notificationLabel, { id: record._id });
       await record.save();
       return res.send({ record, message: 'Success' });

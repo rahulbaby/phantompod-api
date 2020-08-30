@@ -66,7 +66,7 @@ passport.use(
     },
     (token, refreshToken, profile, done) => {
       let user = profile._json;
-      console.log('profile @ passport', user);
+      console.log('google profile @ passport', user);
 
       return done(null, {
         profile: user,

@@ -31,7 +31,7 @@ class BlockController {
 	postsByLike = async (req, res, next) => {
 		try {
 			const userId = req.user.id;
-			const posts = await Post.where({ userId });
+			const posts = await Post.where({ userId }).sort({ createdAt: -1 }).limit(5);
 
 			return res.send({ posts });
 		} catch (error) {

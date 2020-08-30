@@ -11,7 +11,11 @@ const postSchema = new Schema(
 		},
 		podId: {
 			type: Schema.Types.ObjectId,
-			//ref: 'User',
+			ref: 'Pod',
+			required: true,
+		},
+		podUserId: {
+			type: Schema.Types.ObjectId,
 			required: true,
 		},
 		name: {

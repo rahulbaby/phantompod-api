@@ -10,6 +10,7 @@ const PRODUCT_PERIOD = config.get('stripe.PRODUCT_PERIOD');
 const apiVersion = config.get('stripe.apiVersion');
 
 const stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion });
+const sgMail = require('@sendgrid/mail');
 
 class StripeController {
   createCustomer = async (req, res, next) => {
@@ -33,6 +34,27 @@ class StripeController {
         { _id: userId },
         { status: userAccountStatus.CANCELLED, paymentExpiresAt: null, stripeSubscriptionId: null },
       );
+      // send mail
+      let cancellationDate = new Date(Date.now()).toLocaleString();
+      const APIEMAIL = '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';
+      sgMail.setApiKey(APIEMAIL);
+      const msg = {
+        to: `${req.user.email}`,
+        from: 'developer@phantompod.co', // Use the email address or domain you verified above
+        subject: 'Your Subscription has been cancelled!',
+        text: `Hello ${req.user.name}`,
+        html: `We are sorry to see you go!<br/>
+        Per your request your subscription to Phantompod premium has been canceled on ${cancellationDate}.<br/>
+        If you did not request cancellation and this email is being received in error, please contact us to reactivate. <br/>
+
+        <br/><br/>
+        Thanks,<br/><br/>
+        Team Phantompod!`,
+      };
+
+      sgMail.send(msg);
+      //send mail end
+
       return res.status(200);
     } catch (error) {
       return res.status('402').send({ error: { message: error.message } });
@@ -92,8 +114,28 @@ class StripeController {
     const eventsArr = type.split('.');
     if (eventsArr[0] === 'invoice' && eventsArr[1] === 'paid') {
       const user = await User.findOne({ stripeCustomerId });
-      console.log({ user });
       await createPayment(user.id, data.amount_paid / 100, data.currency, data);
+      // invoice start
+      const APIEMAIL = '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';
+      sgMail.setApiKey(APIEMAIL);
+      const msg = {
+        to: `${user.email}`,
+        from: 'developer@phantompod.co', // Use the email address or domain you verified above
+        subject: 'Payment Successful!',
+        text: `Hello ${user.name}`,
+        html: `<strong>Hello ${user.name},</strong><br/><br/>
+        Thank you for subscribing to Phantompod.
+        Your payment method has been charged ${data.amount_paid / 100} ${data.currency}
+        and your subscription has been activated. <br/>
+        You\'ll be charged ${data.amount_paid / 100} ${data.currency} of every month.
+        To update your payment method, please login to your Phantompod account.
+        <br/><br/>
+        Thanks,<br/><br/>
+        Team Phantompod!`,
+      };
+
+      sgMail.send(msg);
+      //invoice end
       await User.findOneAndUpdate(
         { stripeCustomerId },
         {
