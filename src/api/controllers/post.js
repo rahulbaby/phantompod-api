@@ -127,15 +127,15 @@ class PostController {
       let comments = post.comments;
       let commentsLength = comments.length;
       let commentRef = 0;
-      let members = record.members.filter(x => x.linkedinCookiId && x.userId !== req.user.id);
+      let members = record.members.filter(x => x.linkedinCookiId && x.userId !== post.userId);
       let postLikes = 0;
       let profileViews = 0;
 
       record.members.map(({ userId }) => {
-        let user = { ...userId };
+        let user = userId;
         commentRef = commentRef > commentsLength ? (commentRef = 0) : commentRef + 1;
         user.comment = comments[commentRef];
-        if (user.linkedinCookiId !== null) {
+        if (user.linkedinCookiId !== null && user._id.toString() !== post.userId.toString()) {
           (async () => {
             const browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
@@ -174,12 +174,18 @@ class PostController {
             }
             //LIKE
             if (post.autoLike === true) {
-              await page.evaluate(() => {
-                let elements = document.getElementsByClassName(
-                  'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
+              try {
+                await page.waitForSelector(
+                  '[class="artdeco-button_text react-buttontext react-button_text--like"]',
                 );
-                for (let element of elements) element.click();
-              });
+              } catch (e) {
+                await page.evaluate(() => {
+                  let elements = document.getElementsByClassName(
+                    'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
+                  );
+                  for (let element of elements) element.click();
+                });
+              }
             }
 
             //SHARE
