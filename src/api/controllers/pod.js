@@ -224,7 +224,7 @@ class PodController {
     record.members = record.members.filter(x => x.userId.toString() != memberId.toString());
 
     try {
-      let notificationLabel = `${userName} removed from pod - <strong>${record.name}</strong>`;
+      let notificationLabel = `${userName} has rejected your request to join the pod ${record.name}`;
       await createNotification(record.userId, memberId, notificationLabel, { id: record._id });
       await record.save();
       return res.send({ record, message: 'Success' });

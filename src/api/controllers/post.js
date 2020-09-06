@@ -46,6 +46,7 @@ class PostController {
     );
 
     try {
+      let message = 'Post successfully submitted.';
       if (!req.user.isActive && !req.user.onTrial)
         return res.status(400).send({ message: `You don't have any active plans!` });
       const pod = await Pod.getPodRow(podId);
@@ -62,8 +63,9 @@ class PostController {
           id: pod._id,
           url: `pod/details/${pod._id}`,
         });
+        message = 'Your post has been submitted and is pending and is pending admin approval.';
       }
-
+      ret.message = message;
       return res.send(ret);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
@@ -130,9 +132,8 @@ class PostController {
       let profileViews = 0;
 
       record.members.map(({ userId: user }) => {
-        commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
-
         if (user.linkedinCookiId !== null) {
+          commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
           (async () => {
             const browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();

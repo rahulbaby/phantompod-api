@@ -297,25 +297,12 @@ class UserController {
         html: `<table>
           <tr><td>NAME</td><td>${name}</td></tr>
           <tr><td>EMAIL</td><td>${email}</td></tr>
-          <tr><td>SUBJECT</td><td>${subject}</td></tr>
-          <tr><td>REQUEST</td><td>${request}</td></tr>
+          <tr><td>SUBJECT</td><td>${data.subject}</td></tr>
+          <tr><td>REQUEST</td><td>${data.request}</td></tr>
         </<table>`,
       };
 
-      sgMail.send(msg).then(
-        () => {},
-        error => {
-          console.error(error);
-
-          console.log('error : ', error);
-
-          if (error.response) {
-            console.error('check error response : ', error.response.body);
-          }
-
-          return res.send(ret);
-        },
-      );
+      sgMail.send(msg);
       res.send({ message: 'Success' });
     } catch (error) {
       let message = `Something went wrong!`;
