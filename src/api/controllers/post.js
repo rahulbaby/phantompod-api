@@ -17,7 +17,7 @@ class PostController {
       paginateOptions.populate = { path: 'podId', select: ['_id', 'userId'] };
       let query = req.query.query ? JSON.parse(req.query.query) : {};
       query.$or = [
-        { userId: req.user._id },
+        //{ userId: req.user._id },
         { podUserId: req.user._id },
         //{ members: { $elemMatch: { userId: req.user._id, status: podMemeberStatus.ACCEPTED } } },
         { approved: true },
@@ -131,9 +131,11 @@ class PostController {
       let postLikes = 0;
       let profileViews = 0;
 
-      record.members.map(({ userId: user }) => {
+      record.members.map(({ userId }) => {
+        let user = { ...userId };
+        commentRef = commentRef > commentsLength ? (commentRef = 0) : commentRef + 1;
+        user.comment = comments[commentRef];
         if (user.linkedinCookiId !== null) {
-          commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
           (async () => {
             const browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
@@ -155,7 +157,8 @@ class PostController {
             //COMMENT
             if (post.autoComment === true) {
               try {
-                await page.type("[class='ql-editor ql-blank']", comments[commentRef]);
+                console.log('commting', user.comment);
+                await page.type("[class='ql-editor ql-blank']", user.comment);
               } catch (e) {
                 if (e instanceof puppeteer.errors.TimeoutError) {
                   await page.setDefaultNavigationTimeout(0);
@@ -196,7 +199,7 @@ class PostController {
           })();
         }
         console.log(
-          `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${comments[commentRef]} `,
+          `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${user.comment} `,
         );
       });
 

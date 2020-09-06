@@ -43,10 +43,10 @@ class StripeController {
         from: 'developer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Your Subscription has been cancelled!',
         text: `Hello ${req.user.name}`,
-        html: `We are sorry to see you go!<br/>
-        Per your request your subscription to Phantompod premium has been canceled on ${cancellationDate}.<br/>
-        If you did not request cancellation and this email is being received in error, please contact us to reactivate. <br/>
-
+        html: `Hello ${req.user.name}<br/><br/>We are sorry to see you go!<br/><br/>
+        Per your request your subscription to Phantompod premium has been canceled on ${cancellationDate}.<br/><br/>
+        If you did not request cancellation and this email is being received in error, please contact us to reactivate. <br/><br/>
+        You can also login to phantompod your account at anytime and reactivate the subscription.<br/>
         <br/><br/>
         Thanks,<br/><br/>
         Team Phantompod!`,

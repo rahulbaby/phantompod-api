@@ -41,8 +41,8 @@ class PodController {
       if (search)
         andOptions.push({
           $or: [
-            { name: { $regex: '.*' + search + '.*' } },
-            { description: { $regex: '.*' + search + '.*' } },
+            { name: { $regex: '.*' + search + '.*', $options: 'i' } },
+            { description: { $regex: '.*' + search + '.*', $options: 'i' } },
           ],
         });
       query.$and = andOptions;
