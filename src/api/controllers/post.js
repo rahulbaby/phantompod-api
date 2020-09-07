@@ -63,7 +63,7 @@ class PostController {
           id: pod._id,
           url: `pod/details/${pod._id}`,
         });
-        message = 'Your post has been submitted and is pending and is pending admin approval.';
+        message = 'Your post has been submitted and is pending admin approval.';
       }
       ret.message = message;
       return res.send({ ...ret._doc, message });
