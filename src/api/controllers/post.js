@@ -66,7 +66,7 @@ class PostController {
         message = 'Your post has been submitted and is pending and is pending admin approval.';
       }
       ret.message = message;
-      return res.send(ret);
+      return res.send({ ...ret._doc, message });
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
