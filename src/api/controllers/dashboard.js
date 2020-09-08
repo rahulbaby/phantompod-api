@@ -12,18 +12,15 @@ class BlockController {
 			const podsImIn = await Pod.where({
 				members: { $elemMatch: { userId: userId, status: podMemeberStatus.ACCEPTED } },
 			}).countDocuments();
+
 			const postLikes = await Post.aggregate([
-				{
-					$group: {
-						userId: userId,
-						count: { $sum: 'postLikes' },
-					},
-				},
+				{ $match: { userId } },
+				{ $group: { _id: null, likes: { $sum: '$postLikes' } } },
 			]);
 
 			console.log('postLikes', postLikes);
 
-			return res.send({ podsOwn, podsImIn, profileViews, postLikes: postLikes.count || 0 });
+			return res.send({ podsOwn, podsImIn, profileViews, postLikes: postLikes.likes || 0 });
 		} catch (error) {
 			let message = error.message || `Something went wrong fetching stastics!`;
 			return res.status(400).send({ message, error });
