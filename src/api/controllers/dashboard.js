@@ -21,6 +21,8 @@ class BlockController {
 				},
 			]);
 
+			console.log('postLikes', postLikes);
+
 			return res.send({ podsOwn, podsImIn, profileViews, postLikes: postLikes.count || 0 });
 		} catch (error) {
 			let message = error.message || `Something went wrong fetching stastics!`;
