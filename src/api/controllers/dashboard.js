@@ -1,6 +1,7 @@
 import Pod from 'models/pod';
 import Post from 'models/post';
 import User from 'models/user';
+import { toMongoObjectId } from 'db';
 import { podMemeberStatus } from 'base/constants';
 
 class BlockController {
@@ -14,7 +15,7 @@ class BlockController {
 			}).countDocuments();
 
 			const postLikes = await Post.aggregate([
-				{ $match: { userId } },
+				{ $match: { userId: toMongoObjectId(userId) } },
 				{ $group: { _id: null, likes: { $sum: '$postLikes' } } },
 			]);
 
