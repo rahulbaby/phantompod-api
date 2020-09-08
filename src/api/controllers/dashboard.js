@@ -15,7 +15,7 @@ class BlockController {
 			const postLikes = await Post.aggregate([
 				{
 					$group: {
-						_id: null,
+						userId: userId,
 						count: { $sum: 'postLikes' },
 					},
 				},
