@@ -103,6 +103,7 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 					await page.setDefaultNavigationTimeout(0);
 				}
 			}
+			try{
 			const textContent = await page.evaluate(
 				() =>
 					document.querySelector(
@@ -111,7 +112,9 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 			);
 			postLikes = postLikes + textContent;
 			console.log('Post likes = ' + textContent);
-
+					}catch{
+						postLikes = postLikes + 0;
+					}
 			try {
 				await page.goto(prof, { waitUntil: 'load', timeout: 0 });
 			} catch (e) {
