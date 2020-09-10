@@ -137,7 +137,7 @@ class PostController {
         user.comment = comments[commentRef];
         if (user.linkedinCookiId !== null && user._id.toString() !== post.userId.toString()) {
           (async () => {
-            const browser = await puppeteer.launch({ headless: true });
+            const browser = await puppeteer.launch({ headless: true }); 
             const page = await browser.newPage();
             function delay(time) {
               return new Promise(function (resolve) {
@@ -175,9 +175,7 @@ class PostController {
             //LIKE
             if (post.autoLike === true) {
               try {
-                await page.waitForSelector(
-                  '[class="artdeco-button_text react-buttontext react-button_text--like"]',
-                );
+                await page.waitForSelector('[class="artdeco-button__text react-button__text react-button__text--like"]');   
               } catch (e) {
                 await page.evaluate(() => {
                   let elements = document.getElementsByClassName(
