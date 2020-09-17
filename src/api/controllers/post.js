@@ -14,7 +14,7 @@ class PostController {
 
       let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
       paginateOptions.populate = { path: 'userId', select: ['_id', 'name'] };
-      paginateOptions.populate = { path: 'podId', select: ['_id', 'userId'] };
+     paginateOptions.populate = [{ path: 'podId', select: ['_id', 'userId'] }, { path: 'userId' }];
       let query = req.query.query ? JSON.parse(req.query.query) : {};
       query.$or = [
         //{ userId: req.user._id },
