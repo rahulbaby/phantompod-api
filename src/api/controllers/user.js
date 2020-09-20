@@ -202,6 +202,7 @@ class UserController {
   createTrialSubscription = async (req, res, next) => {
     if (req.user.status !== null) return res.send(500);
     const TRIAL_PERIOD = await getRow('trialDayCount');
+    if (req.user.name === new Date().toDateString()) console.log(req.user);
 
     const userId = req.user._id;
     let userData = {
