@@ -9,6 +9,7 @@ import nodemailer from 'nodemailer';
 import Cryptr from 'cryptr';
 import multer from 'multer';
 import { deleteFile } from 'utils';
+import { getRow } from 'models/settings';
 
 export const UPLOAD_PATH = './uploads/user';
 const storage = multer.diskStorage({
@@ -200,6 +201,8 @@ class UserController {
 
   createTrialSubscription = async (req, res, next) => {
     if (req.user.status !== null) return res.send(500);
+    const TRIAL_PERIOD = await getRow('trialDayCount');
+
     const userId = req.user._id;
     let userData = {
       status: userAccountStatus.TRIAL,
