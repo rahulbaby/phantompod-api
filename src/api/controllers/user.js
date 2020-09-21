@@ -59,7 +59,7 @@ class UserController {
       sgMail.setApiKey(APIEMAIL);
       const msg = {
         to: `${email}`,
-        from: 'developer@phantompod.co', // Use the email address or domain you verified above
+        from: 'jennifer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Activate your Phantompod account!',
         text: `Hello ${name}`,
         html: `<strong>Hello ${name},</strong><br/><br/>
@@ -91,7 +91,7 @@ class UserController {
       // var client = nodemailer.createTransport(sgTransport(options));
       //   const mailOptions = {
       //     from: `hello@phantompod.co`,
-      //     to: 'developer@phantompod.co',
+      //     to: 'jennifer@phantompod.co',
       //     subject: `${name}`,
       //     text: `${webUrl}/verify-email?hash=${encryptedString}`,
       //     replyTo: `hello@phantompod.co`
@@ -294,8 +294,8 @@ class UserController {
       const APIEMAIL = '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';
       sgMail.setApiKey(APIEMAIL);
       const msg = {
-        to: `developer@phantompod.co`,
-        from: `developer@phantompod.co`,
+        to: `jennifer@phantompod.co`,
+        from: `jennifer@phantompod.co`,
         subject: 'Support Request',
         text: `Hello admin`,
         html: `<table>
