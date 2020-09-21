@@ -16,7 +16,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const cryptr = new _cryptr.default('pass123');
 const mailOptions = {
   from: `hello@phantompod.co`,
-  to: 'developer@phantompod.co',
+  to: 'jennifer@phantompod.co',
   subject: ``,
   text: `http://localhost:3000/verify-email?hash=`,
   replyTo: `hello@phantompod.co`
