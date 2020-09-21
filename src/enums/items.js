@@ -3,9 +3,9 @@ import { userAccountStatus } from 'base/constants';
 
 export { userAccountStatus };
 export const comments = [
-	'Great post {{firstName}}!',
-	'Thanks for sharing {{firstName}}!',
-	'Love it {{firstName}}!',
+	'Great post',
+	'Thanks for sharing',
+	'Love it',
 	'What a great post',
 	'Always great reading your posts!',
 ];
