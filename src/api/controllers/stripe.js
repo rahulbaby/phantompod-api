@@ -2,10 +2,9 @@ import moment from 'moment';
 import config from 'config';
 import User from 'models/user';
 import { createPayment } from 'models/payments';
+import { getRow } from 'models/settings';
 import { userAccountStatus } from 'base/constants';
 const STRIPE_SECRET_KEY = config.get('stripe.SECRET_KEY');
-const PRODUCT_PRICE_ID = config.get('stripe.PRODUCT_PRICE_ID');
-const PRODUCT_PERIOD = config.get('stripe.PRODUCT_PERIOD');
 
 const apiVersion = config.get('stripe.apiVersion');
 
@@ -40,7 +39,7 @@ class StripeController {
       sgMail.setApiKey(APIEMAIL);
       const msg = {
         to: `${req.user.email}`,
-        from: 'jennifer@phantompod.co', // Use the email address or domain you verified above
+        from: 'developer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Your Subscription has been cancelled!',
         text: `Hello ${req.user.name}`,
         html: `Hello ${req.user.name}<br/><br/>We are sorry to see you go!<br/><br/>
@@ -62,6 +61,7 @@ class StripeController {
   };
 
   createSubscription = async (req, res, next) => {
+    const PRODUCT_PRICE_ID = await getRow('productPriceId');
     const stripeCustomerId = req.user.stripeCustomerId;
     try {
       await stripe.paymentMethods.attach(req.body.paymentMethodId, {
@@ -90,6 +90,7 @@ class StripeController {
   };
 
   subscriptionList = async (req, res, next) => {
+    const PRODUCT_PRICE_ID = await getRow('productPriceId');
     try {
       const rows = await stripe.subscriptions.list({
         customer: req.body.customerId,
@@ -114,13 +115,14 @@ class StripeController {
     const eventsArr = type.split('.');
     if (eventsArr[0] === 'invoice' && eventsArr[1] === 'paid') {
       const user = await User.findOne({ stripeCustomerId });
+      const PRODUCT_PERIOD = await getRow('productPeriod');
       await createPayment(user.id, data.amount_paid / 100, data.currency, data);
       // invoice start
       const APIEMAIL = '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';
       sgMail.setApiKey(APIEMAIL);
       const msg = {
         to: `${user.email}`,
-        from: 'jennifer@phantompod.co', // Use the email address or domain you verified above
+        from: 'developer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Payment Successful!',
         text: `Hello ${user.name}`,
         html: `<strong>Hello ${user.name},</strong><br/><br/>
