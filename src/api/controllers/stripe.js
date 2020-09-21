@@ -40,7 +40,7 @@ class StripeController {
       sgMail.setApiKey(APIEMAIL);
       const msg = {
         to: `${req.user.email}`,
-        from: 'developer@phantompod.co', // Use the email address or domain you verified above
+        from: 'jennifer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Your Subscription has been cancelled!',
         text: `Hello ${req.user.name}`,
         html: `Hello ${req.user.name}<br/><br/>We are sorry to see you go!<br/><br/>
@@ -120,7 +120,7 @@ class StripeController {
       sgMail.setApiKey(APIEMAIL);
       const msg = {
         to: `${user.email}`,
-        from: 'developer@phantompod.co', // Use the email address or domain you verified above
+        from: 'jennifer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Payment Successful!',
         text: `Hello ${user.name}`,
         html: `<strong>Hello ${user.name},</strong><br/><br/>
