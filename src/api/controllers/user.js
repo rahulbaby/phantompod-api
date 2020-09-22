@@ -26,7 +26,6 @@ const upload = multer({ storage }).single('image');
 const cryptr = new Cryptr('pass123');
 const sgMail = require('@sendgrid/mail');
 
-const trialSubscriptionDetails = config.get('trialSubscription');
 const webUrl = config.get('app.webUrl');
 
 class UserController {
@@ -59,7 +58,7 @@ class UserController {
       sgMail.setApiKey(APIEMAIL);
       const msg = {
         to: `${email}`,
-        from: 'jennifer@phantompod.co', // Use the email address or domain you verified above
+        from: 'developer@phantompod.co', // Use the email address or domain you verified above
         subject: 'Activate your Phantompod account!',
         text: `Hello ${name}`,
         html: `<strong>Hello ${name},</strong><br/><br/>
@@ -91,7 +90,7 @@ class UserController {
       // var client = nodemailer.createTransport(sgTransport(options));
       //   const mailOptions = {
       //     from: `hello@phantompod.co`,
-      //     to: 'jennifer@phantompod.co',
+      //     to: 'developer@phantompod.co',
       //     subject: `${name}`,
       //     text: `${webUrl}/verify-email?hash=${encryptedString}`,
       //     replyTo: `hello@phantompod.co`
@@ -202,14 +201,14 @@ class UserController {
   createTrialSubscription = async (req, res, next) => {
     if (req.user.status !== null) return res.send(500);
     const TRIAL_PERIOD = await getRow('trialDayCount');
-    if (req.user.name === new Date().toDateString()) console.log(req.user);
+    const TRIAL_POD_COUNT = await getRow('trialPodCount');
 
     const userId = req.user._id;
     let userData = {
       status: userAccountStatus.TRIAL,
       trialDetails: {
-        expiresAt: moment(new Date()).add('days', trialSubscriptionDetails.TRIAL_PERIOD).unix(),
-        podCount: trialSubscriptionDetails.TRIAL_PERIOD,
+        expiresAt: moment(new Date()).add('days', TRIAL_PERIOD).unix(),
+        podCount: TRIAL_POD_COUNT,
       },
     };
 
@@ -294,8 +293,8 @@ class UserController {
       const APIEMAIL = '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';
       sgMail.setApiKey(APIEMAIL);
       const msg = {
-        to: `jennifer@phantompod.co`,
-        from: `jennifer@phantompod.co`,
+        to: `developer@phantompod.co`,
+        from: `developer@phantompod.co`,
         subject: 'Support Request',
         text: `Hello admin`,
         html: `<table>
