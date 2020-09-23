@@ -58,17 +58,15 @@ router.route('/bot-update-analytics').get(updateAnalytics);
 
 export default router;
 
-function delay(time) {
-	return new Promise(function (resolve) {
-		setTimeout(resolve, time);
-	});
-}
 
 function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 	console.log(cookies, postUrls);
 
 	//==============================Bot starts here======================================================
-
+	if(cookies!=null)
+	{
+		console.log("Crone bot is running");
+		console.log(cookies);
 	//bote code here------------------------------------------------------------
 	(async () => {
 		const browser = await puppeteer.launch({
@@ -86,35 +84,6 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 			obj['value'] = cookies[i]; // sarath here we add index of i cookies to obj array
 			await page.setCookie(obj);
 
-			try {
-				await page.goto(postUrls[i], { waitUntil: 'load', timeout: 0 }); // sarath here  we pass i index post url
-			} catch (e) {
-				if (e instanceof puppeteer.errors.TimeoutError) {
-					await page.setDefaultNavigationTimeout(0);
-				}
-			}
-			// here we read post likes
-			try {
-				await page.waitForSelector(
-					'[class="v-align-middle social-details-social-counts__reactions-count"]',
-				);
-			} catch (e) {
-				if (e instanceof puppeteer.errors.TimeoutError) {
-					await page.setDefaultNavigationTimeout(0);
-				}
-			}
-			try{
-			const textContent = await page.evaluate(
-				() =>
-					document.querySelector(
-						'[class="v-align-middle social-details-social-counts__reactions-count"]',
-					).textContent,
-			);
-			postLikes = postLikes + textContent;
-			console.log('Post likes = ' + textContent);
-					}catch{
-						postLikes = postLikes + 0;
-					}
 			try {
 				await page.goto(prof, { waitUntil: 'load', timeout: 0 });
 			} catch (e) {
@@ -138,18 +107,54 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 			profileViews = profileViews + view;
 			console.log('Profile views = ' + view);
 
-			/----------------------DB UPDATION-----------------------/;
 			try {
-				await Post.findOneAndUpdate({ _id: postIds[i] }, { postLikes });
+				await page.goto(postUrls[i], { waitUntil: 'load', timeout: 0 }); // sarath here  we pass i index post url
+			} catch (e) {
+				if (e instanceof puppeteer.errors.TimeoutError) {
+					await page.setDefaultNavigationTimeout(0);
+				}
+			}
+			// here we read post likes
+			if(postUrls!=null)
+			{
+			try {
+				await page.waitForSelector(
+					'[class="v-align-middle social-details-social-counts__reactions-count"]',
+				);
+			} catch (e) {
+				if (e instanceof puppeteer.errors.TimeoutError) {
+					await page.setDefaultNavigationTimeout(0);
+				}
+			}
+			try{
+			const textContent = await page.evaluate(
+				() =>
+					document.querySelector(
+						'[class="v-align-middle social-details-social-counts__reactions-count"]',
+					).textContent,
+			);
+			postLikes = postLikes + textContent;
+			console.log('Post likes = ' + textContent);
+					}catch{
+						postLikes = postLikes + 0;
+					}
+				}
+			/----------------------DB UPDATION-----------------------/;
+			try {                                                  
+				await Post.findOneAndUpdate({ _id: postIds[i] }, { postLikes : parseInt( postLikes.split(',').join('') )});
 				await User.findOneAndUpdate({ _id: userIds[i] }, { profileViews });
 			} catch (e) {
-				console.log('BOT BD ERRO ', error);
+				console.log('BOT BD ERRO ', e);
 			}
 			/----------------------DB UPDATION END-------------------/;
 			await delay(4000);
 		}
 		await browser.close();
 	})();
+}
+else{
+	console.log("No cookies found in data base");
+}
 
 	//bote code here-----------------------------end----------------------------
 }
