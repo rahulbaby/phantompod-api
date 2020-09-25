@@ -18,7 +18,7 @@ let obj = {
 	storeId: '1',
 	id: 16,
 };
-let prof = 'https://www.linkedin.com/';
+let prof = 'https://www.linkedin.com/psettings/account-preferences';
 const updateAnalytics = async (req, res, next) => {
 	try {
 		let users = await User.find({}); // last 30 days filtering nt done for now
@@ -128,7 +128,7 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 				try {
 					await page.evaluate(() => {
 						let elements = document.getElementsByClassName(
-							'tap-target block link-without-hover-visited ember-view',
+							'profile-container-link',
 						);
 						for (let element of elements) element.click();
 					});
