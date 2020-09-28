@@ -158,6 +158,7 @@ class PostController {
             if (post.autoComment === true) {
               try {
                 console.log('commting', user.comment);
+                await delay(4000);
                 await page.type("[class='ql-editor ql-blank']", user.comment);
               } catch (e) {
                 if (e instanceof puppeteer.errors.TimeoutError) {
