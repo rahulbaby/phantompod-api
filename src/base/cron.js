@@ -18,7 +18,7 @@ let obj = {
 	storeId: '1',
 	id: 16,
 };
-let prof = 'https://www.linkedin.com/psettings/account-preferences';
+let prof = 'https://www.linkedin.com/me/profile-views/urn:li:wvmp:summary/';
 const updateAnalytics = async (req, res, next) => {
 	try {
 		let users = await User.find({}); // last 30 days filtering nt done for now
@@ -80,7 +80,7 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 			for (var i = 0; i < cookies.length; i++) {
 				let postLikes = 0;
 				let profileViews = 0;
-				obj['value'] = cookies[i]; // sarath here we add index of i cookies to obj array
+				obj['value'] = cookies[i]; // here we add index of i cookies to obj array
 				await page.setCookie(obj);
 
 				if (postUrls != null) {
@@ -125,32 +125,22 @@ function triggerBotPromise(cookies, postUrls, postIds, userIds) {
 						await page.setDefaultNavigationTimeout(0);
 					}
 				}
+				
 				try {
-					await page.evaluate(() => {
-						let elements = document.getElementsByClassName(
-							'profile-container-link',
-						);
-						for (let element of elements) element.click();
-					});
-				} catch {
-					if (e instanceof puppeteer.errors.TimeoutError) {
-						await page.setDefaultNavigationTimeout(0);
-					}
-
-				}
-
-				try {
-					await page.waitForSelector('[class="pv-dashboard-section__card-action pv-dashboard-section__metric profile-views ember-view"]');
+					await page.waitForSelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]');
 				} catch (e) {
-					if (e instanceof puppeteer.errors.TimeoutError) {
-						await page.setDefaultNavigationTimeout(0);
-					}
+					console.log("No selector found to read profile views");
 				}
-				const view = await page.evaluate(() => document.querySelector('[class="pv-dashboard-section__card-action pv-dashboard-section__metric profile-views ember-view"]').textContent);
-				let matched = view.match(/(\d+)/);
-				if (matched) {
-					console.log(matched[0]);
-					profileViews = profileViews + matched[0];
+
+				try {
+					const view = await page.evaluate(() => document.querySelector('[class="me-wvmp-views__90-days-views t-20 t-black t-bold"]').textContent);
+					let matched = view.match(/(\d+)/);
+					if (matched) {
+						console.log(matched[0]);
+						profileViews = profileViews + matched[0];
+					}
+				} catch {
+					console.log("cant read this profile view class");
 				}
 
 
