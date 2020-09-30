@@ -13,10 +13,22 @@ const sgMail = require('@sendgrid/mail');
 
 class StripeController {
   createCustomer = async (req, res, next) => {
+
     // Create a new customer object
+    console.log("This is stripe details sending code xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    console.log(req.user.billingDetails);
     const customer = await stripe.customers.create({
-      email: req.user.email,
+       name: req.user.billingDetails.name,
+       email: req.user.email,
+       address: {
+        line1: req.user.billingDetails.streetAddress,
+        postal_code: req.user.billingDetails.zip,
+        city: req.user.billingDetails.city,
+        state: req.user.billingDetails.state,
+        country: req.user.billingDetails.country,
+      }
     });
+
     const stripeCustomerId = customer.id;
     const userId = req.user._id;
     await User.findByIdAndUpdate(userId, { stripeCustomerId });
