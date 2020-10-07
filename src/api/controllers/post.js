@@ -190,12 +190,22 @@ class PostController {
             //SHARE
             if (post.autoShare === true) {
               await delay(2000);
-              await page.evaluate(() => {
-                let elements = document.getElementsByClassName(
-                  'share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view',
-                );
-                for (let element of elements) element.click();
-              });
+             try{
+                await page.evaluate(() => {
+                  let elements = document.getElementsByClassName('artdeco-button reshare-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view');
+                  for (let element of elements) element.click();
+                });
+              }catch{ console.log("cant click on share button"); }
+                
+              await delay(2000);
+              try{
+                await page.evaluate(() => {
+                  let elements = document.getElementsByClassName('share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view');
+                  for (let element of elements) element.click();
+                });
+              }catch{
+                console.log("cant click on the second share button");
+              }
             }
             //Reading profile views
 
