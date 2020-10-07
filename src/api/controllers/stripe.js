@@ -5,7 +5,7 @@ import { createPayment } from 'models/payments';
 import { getRow } from 'models/settings';
 import { userAccountStatus } from 'base/constants';
 const STRIPE_SECRET_KEY = config.get('stripe.SECRET_KEY');
-
+let PRODUCT_PRICE_ID;
 const apiVersion = config.get('stripe.apiVersion');
 
 const stripe = require('stripe')(STRIPE_SECRET_KEY, { apiVersion });
@@ -73,7 +73,21 @@ class StripeController {
   };
 
   createSubscription = async (req, res, next) => {
-    const PRODUCT_PRICE_ID = await getRow('productPriceId');
+    let Inc=req.user.billingDetails.country;
+    const other= await getRow('productPriceId');
+    const india= await getRow('InproductPriceId'); 
+    console.log(Inc,"--------------------------------------------------------------------");
+    if(Inc==="IN")
+    {
+    PRODUCT_PRICE_ID = india;
+    }
+    else
+    {
+      PRODUCT_PRICE_ID = other;
+    }
+    console.log(india,"--------------------value of india---------------");
+    console.log(other,"--------------------value of other---------------");
+    
     const stripeCustomerId = req.user.stripeCustomerId;
     try {
       await stripe.paymentMethods.attach(req.body.paymentMethodId, {
@@ -102,7 +116,22 @@ class StripeController {
   };
 
   subscriptionList = async (req, res, next) => {
-    const PRODUCT_PRICE_ID = await getRow('productPriceId');
+    let Inc=req.user.billingDetails.country;
+    const other= await getRow('productPriceId');
+    const india= await getRow('InproductPriceId');
+    console.log(Inc,"--------------------------------------------------------------------");
+    if(Inc==="IN")
+    {
+    PRODUCT_PRICE_ID = india;
+    }
+    else
+    {
+      PRODUCT_PRICE_ID = other;
+    }
+    console.log(india,"--------------------value of india---------------");
+    console.log(other,"--------------------value of other---------------");
+    
+    //const PRODUCT_PRICE_ID = await getRow('InproductPriceId');
     try {
       const rows = await stripe.subscriptions.list({
         customer: req.body.customerId,
