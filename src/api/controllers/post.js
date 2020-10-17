@@ -14,7 +14,7 @@ class PostController {
 
       let paginateOptions = req.query.options ? JSON.parse(req.query.options) : {};
       paginateOptions.populate = { path: 'userId', select: ['_id', 'name'] };
-     paginateOptions.populate = [{ path: 'podId', select: ['_id', 'userId'] }, { path: 'userId' }];
+      paginateOptions.populate = [{ path: 'podId', select: ['_id', 'userId'] }, { path: 'userId' }];
       let query = req.query.query ? JSON.parse(req.query.query) : {};
       query.$or = [
         //{ userId: req.user._id },
@@ -106,21 +106,10 @@ class PostController {
     }
   };
 
+
   triggerBot = async (req, res, next) => {
     const id = req.query.id;
-    let obj = {
-      domain: '.www.linkedin.com',
-      expirationDate: 1619110812.023159,
-      hostOnly: false,
-      httpOnly: true,
-      name: 'li_at',
-      path: '/',
-      sameSite: 'no_restriction',
-      secure: true,
-      session: false,
-      storeId: '1',
-      id: 16,
-    };
+
     try {
       let post = await Post.findOne({ _id: id });
       let record = await Pod.findOne({ _id: post.podId }).populate('members.userId');
@@ -128,102 +117,124 @@ class PostController {
       let commentsLength = comments.length;
       let commentRef = 0;
       let members = record.members.filter(x => x.linkedinCookiId && x.userId !== post.userId);
-      let postLikes = 0;
-      let profileViews = 0;
-
-      record.members.map(({ userId }) => {
-        let user = userId;
-        commentRef = commentRef > commentsLength ? (commentRef = 0) : commentRef + 1;
-        user.comment = comments[commentRef];
-        if (user.linkedinCookiId !== null && user._id.toString() !== post.userId.toString()) {
-          (async () => {
-            const browser = await puppeteer.launch({ headless: true }); 
-            const page = await browser.newPage();
-            function delay(time) {
-              return new Promise(function (resolve) {
-                setTimeout(resolve, time);
-              });
-            }
-            obj['value'] = user.linkedinCookiId;
-            await page.setCookie(obj);
-
-            try {
-              await page.goto(post.url, { waitUntil: 'load', timeout: 0 });
-            } catch (e) {
-              if (e instanceof puppeteer.errors.TimeoutError) {
-                await page.setDefaultNavigationTimeout(0);
-              }
-            }
-            //COMMENT
-            if (post.autoComment === true) {
-              try {
-                console.log('commting', user.comment);
-                await delay(4000);
-                await page.type("[class='ql-editor ql-blank']", user.comment);
-              } catch (e) {
-                if (e instanceof puppeteer.errors.TimeoutError) {
-                  await page.setDefaultNavigationTimeout(0);
-                }
-              }
-              await delay(4000);
-              await page.evaluate(() => {
-                let elements = document.getElementsByClassName(
-                  'comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3',
-                );
-                for (let element of elements) element.click();
-              });
-            }
-            //LIKE
-            if (post.autoLike === true) {
-              try {
-                await page.waitForSelector('[class="artdeco-button__text react-button__text react-button__text--like"]');   
-              } catch (e) {
-                await page.evaluate(() => {
-                  let elements = document.getElementsByClassName(
-                    'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
-                  );
-                  for (let element of elements) element.click();
-                });
-              }
-            }
-
-            //SHARE
-            if (post.autoShare === true) {
-              await delay(2000);
-             try{
-                await page.evaluate(() => {
-                  let elements = document.getElementsByClassName('artdeco-button reshare-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view');
-                  for (let element of elements) element.click();
-                });
-              }catch{ console.log("cant click on share button"); }
-                
-              await delay(2000);
-              try{
-                await page.evaluate(() => {
-                  let elements = document.getElementsByClassName('share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view');
-                  for (let element of elements) element.click();
-                });
-              }catch{
-                console.log("cant click on the second share button");
-              }
-            }
-            //Reading profile views
-
-            await delay(4000);
-            await browser.close();
-          })();
-        }
-        console.log(
-          `USER NAME : ${user.name} , linkedinCookiId : ${user.linkedinCookiId} , comment : ${user.comment} `,
-        );
+      let botArr = [];
+      record.members.map(async ({ userId: user }) => {
+        let botSingleObj = {};
+        commentRef = commentRef > comments.length ? (commentRef = 0) : commentRef + 1;
+        botSingleObj.linkedinCookiId = user.linkedinCookiId;
+        botSingleObj.autoComment = post.autoComment;
+        botSingleObj.autoLike = post.autoLike;
+        botSingleObj.autoShare = post.autoShare;
+        botSingleObj.comment = comments[commentRef];
+        botSingleObj.url = post.url;
+        botArr.push(botSingleObj);
       });
 
+      triggerBotPromise(botArr);
       return res.send(record);
     } catch (error) {
       let message = error.message || `Something went wrong!`;
       return res.status(400).send({ message, error });
     }
   };
+}
+
+function delay(time) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, time);
+  });
+}
+
+async function triggerBotPromise(botArr) {
+
+  let obj = {
+    domain: '.www.linkedin.com',
+    expirationDate: 1619110812.023159,
+    hostOnly: false,
+    httpOnly: true,
+    name: 'li_at',
+    path: '/',
+    sameSite: 'no_restriction',
+    secure: true,
+    session: false,
+    storeId: '1',
+    id: 16,
+  };
+
+  for (let i = 0; i < botArr.length; i++) {
+    let botObj = botArr[i];
+    if (!botObj.linkedinCookiId || botObj.linkedinCookiId === '' || botObj.linkedinCookiId === null)
+      continue;
+
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    obj['value'] = botObj.linkedinCookiId;
+    console.log(obj);
+
+    await page.setCookie(obj);
+    try {
+      await page.goto(botObj.url, { waitUntil: 'load', timeout: 0 });
+    } catch (e) {
+      if (e instanceof puppeteer.errors.TimeoutError) {
+        await page.setDefaultNavigationTimeout(0);
+      }
+    }
+    //COMMENT
+    console.log(botObj.comment);
+    if (botObj.autoComment === true) {
+      try {
+        await page.type("[class='ql-editor ql-blank']", botObj.comment);
+      } catch (e) {
+        if (e instanceof puppeteer.errors.TimeoutError) {
+          await page.setDefaultNavigationTimeout(0);
+        }
+      }
+      await delay(4000);
+      await page.evaluate(() => {
+        let elements = document.getElementsByClassName(
+          'comments-comment-box__submit-button artdeco-button artdeco-button--1 mt3',
+        );
+        for (let element of elements) element.click();
+      });
+    }
+    //LIKE
+    if (botObj.autoLike === true) {
+      try {
+        await page.waitForSelector('[class="artdeco-button__text react-button__text react-button__text--like"]');
+      } catch (e) {
+        await page.evaluate(() => {
+          let elements = document.getElementsByClassName(
+            'artdeco-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view',
+          );
+          for (let element of elements) element.click();
+        });
+      }
+    }
+    //SHARE
+    if (botObj.autoShare === true) {
+      await delay(2000);
+      try {
+        await page.evaluate(() => {
+          let elements = document.getElementsByClassName('artdeco-button reshare-button artdeco-button--muted artdeco-button--4 artdeco-button--tertiary ember-view');
+          for (let element of elements) element.click();
+        });
+      } catch { console.log("cant click on share button"); }
+
+      await delay(2000);
+      try {
+        await page.evaluate(() => {
+          let elements = document.getElementsByClassName('share-actions__primary-action artdeco-button artdeco-button--2 artdeco-button--primary ember-view');
+          for (let element of elements) element.click();
+        });
+      } catch {
+        console.log("cant click on the second share button");
+      }
+    }
+
+    await delay(4000);
+    await browser.close();
+  }
+  console.log('triggerBotPromise end');
 }
 
 export default new PostController();
